@@ -6,4 +6,9 @@ public class B extends Base {
         System.out.println("CallB");
     }
 
+    @Override
+    public void print() {
+        System.out.println("B Print");
+    }
+
 }

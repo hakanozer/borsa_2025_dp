@@ -8,8 +8,19 @@ public class MainMiras {
         B b = new B();
         C c = new C();
 
-        a.print();
+        globalPrint(a);
+        globalPrint(b);
+        globalPrint(c);
 
     }
+
+    public static void globalPrint( Base obj ) {
+        if (obj instanceof A) {
+            A a = (A) obj;
+            a.sum();
+        }
+        obj.print();
+    }
+
 
 }

@@ -12,6 +12,7 @@ public class Customer {
     }
 
     public void setFirstName(String firstName) {
+        if (firstName.length() > 3)
         this.firstName = firstName;
     }
 
