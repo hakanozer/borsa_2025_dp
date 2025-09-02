@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OpenCloseService {
 
-    public void openClose(IUser iUser) {
-        iUser.entry();
+    public String openClose(IUser iUser) {
+        return iUser.entry();
     }
 
 }

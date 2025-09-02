@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 public class CustomerComponent implements IUser {
 
     @Override
-    public void entry() {
-        System.out.println("Admin Entry!");
+    public String entry() {
+        return "Customer Entry!";
     }
 
 }

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 public class UserComponent implements IUser {
 
     @Override
-    public void entry() {
-        System.out.println("User Entry!");
+    public String entry() {
+        return "User Entry!";
     }
 
 }
