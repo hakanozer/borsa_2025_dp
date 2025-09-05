@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern ve Anti-Pattern Kavramları</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <header class="bg-blue-700 text-white p-6 shadow-md">
+    <h1 class="text-3xl font-bold">Design Pattern ve Anti-Pattern Kavramları</h1>
+    <p class="text-lg mt-2">Spring Boot 3.5 - REST API Perspektifi</p>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-6 space-y-10">
+    <section class="bg-white rounded-2xl shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-blue-700 mb-4">Pattern Nedir?</h2>
+      <p class="mb-4 text-justify">
+        Yazılım geliştirmede <strong>Design Pattern</strong>, tekrar eden problemlere karşı geliştirilen, test edilmiş ve kabul görmüş çözümleri ifade eder.
+        Bir pattern, kodun okunabilirliğini, bakımını ve ölçeklenebilirliğini artırır. Örneğin Spring Boot REST API tasarlarken <em>Factory Pattern</em> veya <em>Builder Pattern</em> kullanmak, karmaşık nesne oluşturma süreçlerini yönetilebilir hale getirir.
+      </p>
+      <ul class="list-disc pl-6 space-y-2">
+        <li><strong>Neden:</strong> Tekrar eden problemler için standardizasyon sağlar.</li>
+        <li><strong>Sonuç:</strong> Kod okunabilirliği ve sürdürülebilirliği artar.</li>
+        <li><strong>Fayda:</strong> Ekip içi iletişimi güçlendirir, yazılım mimarisi daha öngörülebilir hale gelir.</li>
+      </ul>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Anti-Pattern Nedir?</h2>
+      <p class="mb-4 text-justify">
+        <strong>Anti-Pattern</strong>, ilk bakışta çözüm gibi görünen ama uzun vadede yazılımın sürdürülebilirliğine zarar veren yaklaşımlardır.
+        Örneğin Spring Boot uygulamalarında tüm iş mantığını <code>Controller</code> sınıflarına yüklemek, kısa vadede işleri hızlandırabilir. Ancak bu yaklaşım,
+        bakım maliyetini artırır, test edilebilirliği düşürür ve <em>God Object</em> sorununa yol açar.
+      </p>
+      <ul class="list-disc pl-6 space-y-2">
+        <li><strong>Neden:</strong> Kısa vadeli çözüm arayışı veya yanlış pattern kullanımı.</li>
+        <li><strong>Sonuç:</strong> Kod karmaşası, test edilebilirlik ve ölçeklenebilirlik sorunları.</li>
+        <li><strong>Fayda:</strong> Anti-pattern farkındalığı, yazılımcının yanlış yaklaşımlardan kaçınmasını sağlar.</li>
+      </ul>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-green-600 mb-4">Pattern vs Anti-Pattern</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-blue-50 p-4 rounded-xl">
+          <h3 class="font-bold text-blue-700 mb-2">Pattern Kullanımı</h3>
+          <p class="mb-2">Spring Boot REST API için <em>Strategy Pattern</em> kullanımı:</p>
+          <ul class="list-disc pl-6 space-y-1 text-sm">
+            <li>Farklı iş mantıklarını kolayca değiştirilebilir hale getirir.</li>
+            <li>Test edilebilirliği artırır.</li>
+            <li>Yeni senaryolar eklemek minimum kod değişikliği gerektirir.</li>
+          </ul>
+        </div>
+
+        <div class="bg-red-50 p-4 rounded-xl">
+          <h3 class="font-bold text-red-600 mb-2">Anti-Pattern Kullanımı</h3>
+          <p class="mb-2">REST API’de <em>God Controller</em> yaklaşımı:</p>
+          <ul class="list-disc pl-6 space-y-1 text-sm">
+            <li>Tüm iş mantığının Controller’a yüklenmesi.</li>
+            <li>Testlerin zorlaşması.</li>
+            <li>Bakım maliyetinin hızla artması.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-md p-6">
+      <h2 class="text-2xl font-semibold text-purple-700 mb-4">Sonuç ve Öneriler</h2>
+      <p class="text-justify">
+        Design Pattern kullanımı, yazılımın uzun vadede sürdürülebilirliğini ve kalitesini artırırken, Anti-Pattern yaklaşımlarından kaçınmak
+        yazılımcının üretkenliğini ve ekibin verimliliğini korur. Spring Boot 3.5 ve REST API geliştirme sürecinde bu farkındalık,
+        daha sağlam ve esnek sistemler inşa etmenizi sağlar.
+      </p>
+    </section>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-200 p-6 text-center mt-10">
+    <p>📌 Daha fazla ileri seviye yazılım içeriği için <a href="https://gptonline.ai/tr/" class="text-blue-400 underline">GPTOnline Türkçe</a> adresini ziyaret edin.</p>
+  </footer>
+</body>
+</html>

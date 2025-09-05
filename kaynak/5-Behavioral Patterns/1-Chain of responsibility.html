@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot ve REST API ile Chain of Responsibility Tasarım Deseni</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #005f99;
+            --secondary-color: #f0f0f0;
+            --text-color: #333;
+            --light-text-color: #666;
+            --bg-color: #fff;
+            --card-bg-color: #fafafa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            color: var(--light-text-color);
+            font-size: 1.1em;
+        }
+
+        .content h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-size: 1.8em;
+        }
+
+        .content h3 {
+            color: var(--text-color);
+            font-weight: 700;
+            margin-top: 30px;
+            font-size: 1.4em;
+        }
+
+        .content p {
+            margin-bottom: 20px;
+        }
+
+        .code-block {
+            background-color: var(--card-bg-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95em;
+        }
+
+        .benefit-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .benefit-list li {
+            background: var(--card-bg-color);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--primary-color);
+            position: relative;
+        }
+
+        .benefit-list li strong {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .content h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Spring Boot ve REST API ile Chain of Responsibility Tasarım Deseni</h1>
+        <p>Gelişmiş Yazılımcılar için Esnek İstek İşleme Zinciri</p>
+    </header>
+
+    <div class="content">
+        <h2>Chain of Responsibility Nedir?</h2>
+        <p><strong>Chain of Responsibility</strong>, GoF (Gang of Four) tarafından tanımlanmış bir <strong>davranışsal (behavioral)</strong> tasarım desenidir. Bu desen, bir isteğin alıcıları arasında bağları gevşetir. Bir isteğin birden fazla nesne tarafından işlenebileceği durumlarda, isteği işleyebilecek nesneleri sıralı bir şekilde birbirine bağlar. Böylece, istek zincir boyunca ilerler ve bu isteği işleyebilen ilk nesne tarafından ele alınır.</p>
+
+        <p>Desen, bir dizi işleyici (handler) nesnesini birbirine bağlayarak bir zincir oluşturur. Her işleyici, isteği işleyip işleyemeyeceğine karar verir. Eğer işleyebiliyorsa, işlemi tamamlar. Aksi takdirde, isteği zincirdeki bir sonraki işleyiciye iletir. Bu, işlemden sorumlu olan somut nesneleri, istekte bulunan istemciden tamamen ayırır.</p>
+
+        ---
+
+        <h2>Neden ve Ne Zaman Kullanılmalı? (Neden-Sonuç İlişkisi)</h2>
+        <p>Bir REST API'ye gelen bir isteğin, bir dizi farklı doğrulama, işleme veya zenginleştirme adımından geçmesi gereken senaryolar vardır. Bu adımların sırası önemli olabilir ve her adımın kendi mantığına sahip olması gerekebilir. Bu durumun neden-sonuç ilişkisini aşağıdaki senaryo üzerinden inceleyelim:</p>
+        
+        <p><strong>Senaryo:</strong> Bir e-ticaret platformunda, sipariş işlemini yöneten bir REST API end-point'i geliştirdiğinizi düşünün. Gelen sipariş isteğinin aşağıdaki gibi bir dizi kontrol ve işlemden geçmesi gerekiyor:</p>
+        <ol>
+            <li><strong>Kimlik Doğrulama:</strong> İstek, geçerli bir kullanıcı token'ı içeriyor mu?</li>
+            <li><strong>Stok Kontrolü:</strong> Siparişteki ürünlerin stokları yeterli mi?</li>
+            <li><strong>Promosyon Uygulama:</strong> Eğer bir promosyon kodu varsa, indirim uygulanacak mı?</li>
+            <li><strong>Sipariş Kaydı:</strong> Tüm kontroller başarılıysa, sipariş veritabanına kaydedilecek.</li>
+        </ol>
+        
+        <p><strong>Yetersiz Yaklaşım (Monolitik İşlem):</strong> Eğer bu adımları tek bir kontrolcü veya servis metodu içinde yönetirsek, kodumuz aşağıdaki gibi karmaşık ve okunaksız hale gelebilir:</p>
+
+        <div class="code-block">
+            <pre>
+@PostMapping("/api/orders")
+public ResponseEntity<?> createOrder(@RequestBody OrderRequest request, @RequestHeader("Authorization") String token) {
+    // 1. Kimlik Doğrulama
+    if (!authService.isValidToken(token)) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+    }
+
+    // 2. Stok Kontrolü
+    if (!stockService.checkStock(request.getItems())) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient stock");
+    }
+
+    // 3. Promosyon Uygulama
+    Order order = new Order(request);
+    if (request.getPromoCode() != null) {
+        promoService.applyPromo(order, request.getPromoCode());
+    }
+
+    // 4. Sipariş Kaydı
+    orderService.saveOrder(order);
+
+    return ResponseEntity.ok("Order created successfully.");
+}
+            </pre>
+        </div>
+
+        <p><strong>Sonuç:</strong> Bu monolitik yaklaşım, her bir adımın bir diğerine sıkıca bağlı olmasına neden olur. Yeni bir doğrulama adımı (örneğin, dolandırıcılık tespiti) eklemek istediğimizde, mevcut metodu değiştirmek zorunda kalırız. Bu durum, kodun **değişikliğe kapalı (Open-Closed Principle'a aykırı)** olmasına ve test edilebilirliğinin düşmesine yol açar.</p>
+
+        <p><strong>Chain of Responsibility Çözümü:</strong> Bu sorunu çözmek için, her bir işleme adımını bir işleyici (handler) olarak tasarlar ve bu işleyicileri bir zincir oluşturacak şekilde birbirine bağlarız. Her işleyici, bir sonraki işleyiciyi referans alır.</p>
+        
+        <p><strong>Adımlar:</strong></p>
+        <ol>
+            <li>İşleyiciler için ortak bir arayüz (<code>OrderHandler</code>) tanımlayın. Bu arayüz, genellikle bir <code>handle()</code> metodu ve bir sonraki işleyiciyi ayarlayan bir metot içerir.</li>
+            <li>Her bir işlem adımı için somut işleyici sınıfları (<code>AuthHandler</code>, <code>StockHandler</code>, vb.) oluşturun ve bu sınıfları <code>OrderHandler</code> arayüzünü implemente edin.</li>
+            <li>Bir zincir oluşturucu sınıf veya ana servis içinde, bu işleyicileri doğru sırayla birbirine bağlayın.</li>
+        </ol>
+
+        <div class="code-block">
+            <pre>
+public interface OrderHandler {
+    void setNextHandler(OrderHandler nextHandler);
+    void handle(OrderRequest request) throws Exception;
+}
+
+@Component
+public class AuthHandler implements OrderHandler {
+    private OrderHandler nextHandler;
+
+    @Override
+    public void setNextHandler(OrderHandler nextHandler) {
+        this.nextHandler = nextHandler;
+    }
+
+    @Override
+    public void handle(OrderRequest request) throws Exception {
+        // Kimlik doğrulama mantığı
+        if (nextHandler != null) {
+            nextHandler.handle(request);
+        }
+    }
+}
+
+// Diğer işleyiciler (StockHandler, PromotionHandler, vb.) de benzer şekilde oluşturulur.
+            </pre>
+        </div>
+
+        <p><strong>Zincir Oluşturma ve Kontrolcü Kullanımı:</strong></p>
+        
+        <div class="code-block">
+            <pre>
+@Configuration
+public class OrderHandlerChainConfig {
+    @Bean
+    public OrderHandler orderProcessingChain(AuthHandler authHandler, StockHandler stockHandler, OrderPersistHandler orderPersistHandler) {
+        authHandler.setNextHandler(stockHandler);
+        stockHandler.setNextHandler(orderPersistHandler);
+        return authHandler; // Zincirin başlangıcı
+    }
+}
+
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+    private final OrderHandler orderProcessingChain;
+
+    @Autowired
+    public OrderController(@Qualifier("orderProcessingChain") OrderHandler orderProcessingChain) {
+        this.orderProcessingChain = orderProcessingChain;
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createOrder(@RequestBody OrderRequest request) {
+        try {
+            orderProcessingChain.handle(request);
+            return ResponseEntity.ok("Order processed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+}
+            </pre>
+        </div>
+
+        ---
+
+        <h2>Kullanılmasının Sağlayacağı Faydalar</h2>
+        <ul class="benefit-list">
+            <li>
+                <strong>Esneklik ve Genişletilebilirlik:</strong> Yeni bir işlem adımı (örneğin, <code>FraudHandler</code>) eklemek istediğinizde, mevcut işleyicileri veya kontrolcüyü değiştirmeye gerek yoktur. Sadece yeni bir işleyici sınıfı oluşturur ve zincire ekleyerek mevcut zincir bağlantısını güncellersiniz. Bu, kodun **değişikliğe kapalı** olmasını sağlar.
+            </li>
+            <li>
+                <strong>Bağlılıkların Gevşetilmesi:</strong> Her işleyici kendi sorumluluğuna sahiptir ve sadece bir sonraki işleyiciyi tanır. İstemci (<code>OrderController</code>), hangi işleyicinin hangi işlemi yapacağını bilmek zorunda değildir; sadece zincirin başlangıcını tetikler. Bu, **Loose Coupling (Gevşek Bağlılık)** ilkesini destekler.
+            </li>
+            <li>
+                <strong>Tek Sorumluluk Prensibi (Single Responsibility Principle):</strong> Her işleyici sınıfı, sadece tek bir sorumluluğa (örneğin, kimlik doğrulama veya stok kontrolü) sahiptir. Bu, kodun daha temiz, anlaşılır ve bakımının kolay olmasını sağlar.
+            </li>
+            <li>
+                <strong>Dinamik Yapılandırma:</strong> Zincir, çalışma zamanında (runtime) dinamik olarak oluşturulabilir veya değiştirilebilir. Farklı istek türleri için farklı işlem zincirleri oluşturulabilir, bu da uygulamanın esnekliğini artırır.
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

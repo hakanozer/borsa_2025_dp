@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liskov Substitution Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #dc2626;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Liskov Substitution Principle (LSP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Liskov Substitution Principle</strong>, SOLID prensiplerinin üçüncüsüdür ve türetilmiş sınıfların, türedikleri sınıfların yerine sorunsuzca geçebilmesi gerektiğini söyler.</p>
+      <p>Başka bir deyişle: <em>"Bir alt sınıf, üst sınıfın tüm davranışlarını bozmayacak şekilde kullanılabilmelidir."</em></p>
+      <p>Eğer bir alt sınıf üst sınıfın kontratını bozarsa, bu durumda <strong>LSP ihlali</strong> söz konusu olur. Bu da polymorphism avantajlarını kaybettirir ve beklenmedik runtime hatalarına yol açar.</p>
+      <p><strong>Sonuç olarak:</strong> LSP uygulanmazsa, inheritance (kalıtım) güvenilmez hale gelir ve sistem kırılganlaşır. Uygulanırsa ise <strong>sağlam, tahmin edilebilir ve genişletilebilir</strong> bir mimari elde edilir.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>❌ Yanlış Kullanım (LSP ihlali)</h3>
+      <pre><code>package com.example.demo.model;
+
+public class Bird {
+    public void fly() {
+        System.out.println("Kuş uçuyor...");
+    }
+}
+
+public class Ostrich extends Bird {
+    @Override
+    public void fly() {
+        // Devekuşu uçamaz! Bu, LSP ihlalidir.
+        throw new UnsupportedOperationException("Devekuşu uçamaz!");
+    }
+}
+</code></pre>
+
+      <h3>✅ Doğru Kullanım (LSP uygulanmış)</h3>
+      <pre><code>package com.example.demo.model;
+
+public interface Bird {
+    void eat();
+}
+
+public interface FlyableBird extends Bird {
+    void fly();
+}
+
+public class Sparrow implements FlyableBird {
+    public void eat() {
+        System.out.println("Serçe yemek yiyor.");
+    }
+    public void fly() {
+        System.out.println("Serçe uçuyor.");
+    }
+}
+
+public class Ostrich implements Bird {
+    public void eat() {
+        System.out.println("Devekuşu yemek yiyor.");
+    }
+    // Uçamaz, dolayısıyla fly metodu yok!
+}
+</code></pre>
+
+      <p>Burada <code>Ostrich</code> sınıfı <code>Bird</code> arayüzünü, <code>Sparrow</code> ise <code>FlyableBird</code> arayüzünü uygulamaktadır. Böylece devekuşu için uçma davranışı dayatılmamış olur. Bu, <strong>LSP’ye uygun</strong> bir çözümdür.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Polymorphism güvenilir şekilde kullanılabilir.</li>
+        <li>Kodun davranışı öngörülebilir hale gelir.</li>
+        <li>Alt sınıflar, üst sınıfların tüm beklentilerini karşılar.</li>
+        <li>Inheritance hiyerarşisi daha anlamlı ve doğru kurulur.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Güvenilir Kalıtım:</strong> Tüm alt sınıflar üst sınıfın yerine geçebilir, runtime hataları engellenir.</li>
+        <li><strong>Esnek Mimari:</strong> Yeni sınıflar eklenirken mevcut davranışlar bozulmaz.</li>
+        <li><strong>Test Kolaylığı:</strong> Mock nesneler ve polimorfik testler daha kolay yazılır.</li>
+        <li><strong>Yeniden Kullanılabilirlik:</strong> Kod tekrar kullanılabilir hale gelir.</li>
+        <li><strong>Bakım Kolaylığı:</strong> Kod büyüdükçe kalıtım yapısı karmaşıklaşmaz.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

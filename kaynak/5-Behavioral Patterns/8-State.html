@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot ve REST API ile State Tasarım Deseni</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #005f99;
+            --secondary-color: #f0f0f0;
+            --text-color: #333;
+            --light-text-color: #666;
+            --bg-color: #fff;
+            --card-bg-color: #fafafa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            color: var(--light-text-color);
+            font-size: 1.1em;
+        }
+
+        .content h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-size: 1.8em;
+        }
+
+        .content h3 {
+            color: var(--text-color);
+            font-weight: 700;
+            margin-top: 30px;
+            font-size: 1.4em;
+        }
+
+        .content p {
+            margin-bottom: 20px;
+        }
+
+        .code-block {
+            background-color: var(--card-bg-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95em;
+        }
+
+        .benefit-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .benefit-list li {
+            background: var(--card-bg-color);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--primary-color);
+            position: relative;
+        }
+
+        .benefit-list li strong {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .content h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Spring Boot ve REST API ile State Tasarım Deseni</h1>
+        <p>Gelişmiş Yazılımcılar için Dinamik Davranışları Yönetme</p>
+    </header>
+
+    <div class="content">
+        <h2>State Nedir?</h2>
+        <p><strong>State</strong>, GoF (Gang of Four) tarafından tanımlanmış bir <strong>davranışsal (behavioral)</strong> tasarım desenidir. Bu desenin temel amacı, bir nesnenin davranışı, nesnenin durumuna (state) göre dinamik olarak değiştiğinde, bu durumu yönetmek için kullanılır. Desen, nesnenin her bir olası durumunu ayrı bir sınıfa dönüştürür. Bu sayede, nesne durumuna bağlı olan karmaşık <code>if-else</code> veya <code>switch-case</code> bloklarından kaçınılır ve kod daha temiz, yönetilebilir hale gelir.</p>
+
+        <p>Desen üç ana bileşenden oluşur:
+        <ul>
+            <li><strong>Context (Bağlam):</strong> Davranışı durumuna bağlı olarak değişen ana nesnedir. Durum nesnesine bir referans tutar ve durum değişimlerini yönetir. İstemci (client) kod, Context nesnesiyle etkileşime girer.</li>
+            <li><strong>State (Durum):</strong> Tüm olası durumlar için ortak davranışı tanımlayan bir arayüzdür. Genellikle Context nesnesinin durumuna göre farklı eylemleri gerçekleştirecek metotları içerir.</li>
+            <li><strong>ConcreteState (Somut Durum):</strong> <code>State</code> arayüzünü implemente eden ve belirli bir durum için özel davranışı sağlayan somut sınıflardır. Her sınıf, kendi durumuna ait eylemi gerçekleştirir ve gerekirse Context nesnesinin durumunu bir diğer duruma değiştirir.</li>
+        </ul></p>
+
+        ---
+
+        <h2>Neden ve Ne Zaman Kullanılmalı? (Neden-Sonuç İlişkisi)</h2>
+        <p>Bir REST API'de, bir kaynak (resource) veya bir işlemin, durumuna bağlı olarak farklı davranışlar sergilemesi gerekebilir. Örneğin, bir sipariş kaynağı "beklemede", "gönderildi" veya "iptal edildi" durumlarında farklı işlemler alabilir. Bu durumun neden-sonuç ilişkisini aşağıdaki senaryo üzerinden inceleyelim:</p>
+        
+        <p><strong>Senaryo:</strong> Bir sipariş takip API'si geliştirdiğinizi düşünün. Müşteriler, bir siparişin durumuna göre farklı işlemler yapabilirler.
+        <ul>
+            <li><strong>Beklemede (Pending):</strong> Sipariş iptal edilebilir veya gönderime hazır hale getirilebilir.</li>
+            <li><strong>Gönderildi (Shipped):</strong> Sipariş teslim edilebilir veya iade başlatılabilir.</li>
+            <li><strong>Teslim Edildi (Delivered):</strong> Sadece iade başlatılabilir.</li>
+            <li><strong>İptal Edildi (Canceled):</strong> Hiçbir işlem yapılamaz.</li>
+        </ul></p>
+        
+        <p><strong>Yetersiz Yaklaşım (İç İçe IF-ELSE):</strong> Eğer State deseni kullanılmazsa, siparişin durumunu yöneten servis veya kontrolcü, aşağıdaki gibi karmaşık ve okunaksız <code>if-else</code> blokları içerecektir:</p>
+
+        <div class="code-block">
+            <pre>
+@Service
+public class OrderService {
+    public void processOrderAction(String orderId, String action) {
+        Order order = findById(orderId);
+        
+        if ("cancel".equals(action)) {
+            if ("PENDING".equals(order.getStatus())) {
+                order.setStatus("CANCELED");
+                // ... ilgili işlemler
+            } else {
+                throw new IllegalStateException("Sipariş iptal edilemez.");
+            }
+        } else if ("ship".equals(action)) {
+            if ("PENDING".equals(order.getStatus())) {
+                order.setStatus("SHIPPED");
+                // ... ilgili işlemler
+            } else {
+                throw new IllegalStateException("Sipariş gönderilemez.");
+            }
+        }
+        // ... her yeni durum ve eylem için yeni if-else blokları
+    }
+}
+            </pre>
+        </div>
+
+        <p><strong>Sonuç:</strong> Bu monolitik yaklaşım, her yeni durum veya işlem eklendiğinde mevcut kodun değiştirilmesini gerektirir. Bu durum, **Open-Closed Principle (Açık/Kapalı Prensibi)**'ni ihlal eder ve kodun bakımını zorlaştırır. Ayrıca, kod karmaşıklığı arttıkça hatalara daha açık hale gelir.</p>
+
+        <p><strong>State Çözümü:</strong> Bu sorunu çözmek için, siparişin her bir durumunu ayrı bir sınıfa dönüştürebiliriz. Sipariş (Context) nesnesi, mevcut durum nesnesine bir referans tutar ve gelen isteği bu durum nesnesine devreder. Durum nesnesi, kendi içinde hangi işlemlerin geçerli olduğuna karar verir ve Context'in durumunu değiştirme yetkisine sahiptir.</p>
+        
+        <p><strong>Adımlar:</strong></p>
+        <ol>
+            <li>Tüm sipariş durumları için ortak bir <code>OrderState</code> arayüzü tanımlayın.</li>
+            <li>Her bir durum için (<code>PendingState</code>, <code>ShippedState</code>, vb.) bu arayüzü implemente eden somut sınıflar oluşturun. Bu sınıflar, kendi durumlarına özgü mantığı içerir.</li>
+            <li>Siparişin kendisi (Context), mevcut durumuna bir referans tutar ve durum değiştirme metotlarını sağlar.</li>
+        </ol>
+
+        <div class="code-block">
+            <pre>
+// 1. Context: Order.java (JPA Entity olarak düşünülebilir)
+public class Order {
+    private String status;
+    private OrderState state;
+
+    // Durumlar için statik nesneler
+    public static final OrderState PENDING = new PendingState();
+    public static final OrderState SHIPPED = new ShippedState();
+    public static final OrderState CANCELED = new CanceledState();
+    
+    // constructor...
+    
+    public void setState(OrderState state) {
+        this.state = state;
+    }
+    
+    public void cancel() {
+        state.cancel(this);
+    }
+    
+    public void ship() {
+        state.ship(this);
+    }
+    // Diğer eylem metotları...
+}
+
+// 2. State Arayüzü: OrderState.java
+public interface OrderState {
+    void cancel(Order order);
+    void ship(Order order);
+    // Diğer eylemler...
+}
+
+// 3. Concrete State: PendingState.java
+public class PendingState implements OrderState {
+    @Override
+    public void cancel(Order order) {
+        System.out.println("Sipariş iptal ediliyor.");
+        order.setStatus("CANCELED");
+        order.setState(Order.CANCELED);
+    }
+    
+    @Override
+    public void ship(Order order) {
+        System.out.println("Sipariş gönderiliyor.");
+        order.setStatus("SHIPPED");
+        order.setState(Order.SHIPPED);
+    }
+}
+
+// Concrete State: CanceledState.java
+public class CanceledState implements OrderState {
+    @Override
+    public void cancel(Order order) {
+        throw new IllegalStateException("İptal edilmiş sipariş tekrar iptal edilemez.");
+    }
+    
+    @Override
+    public void ship(Order order) {
+        throw new IllegalStateException("İptal edilmiş sipariş gönderilemez.");
+    }
+}
+            </pre>
+        </div>
+
+        <p><strong>API Kontrolcü Kullanımı:</strong></p>
+        
+        <div class="code-block">
+            <pre>
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+    private final OrderRepository orderRepository;
+
+    @PutMapping("/{id}/actions/{action}")
+    public ResponseEntity&lt;?&gt; performAction(@PathVariable Long id, @PathVariable String action) {
+        Order order = orderRepository.findById(id).orElseThrow();
+        
+        try {
+            switch (action) {
+                case "cancel":
+                    order.cancel();
+                    break;
+                case "ship":
+                    order.ship();
+                    break;
+                //...
+            }
+            orderRepository.save(order);
+            return ResponseEntity.ok("Action successful.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+}
+            </pre>
+        </div>
+
+        ---
+
+        <h2>Kullanılmasının Sağlayacağı Faydalar</h2>
+        <ul class="benefit-list">
+            <li>
+                <strong>Sorumlulukların Ayrılması:</strong> Her durum için özel davranış, ayrı bir sınıf içinde kapsüllenir. Bu, Context sınıfının karmaşık <code>if-else</code> mantığından kurtulmasını sağlar. Sipariş nesnesi sadece kendi durumunu ve davranışını bilmekle yükümlüdür. Bu, **Single Responsibility Principle (Tek Sorumluluk Prensibi)**'ne uyum sağlar.
+            </li>
+            <li>
+                <strong>Esneklik ve Genişletilebilirlik:</strong> Yeni bir durum (örneğin, "İade Edildi") eklemek istediğinizde, mevcut kodda (<code>Order</code> ve <code>OrderController</code>) herhangi bir değişiklik yapmanıza gerek yoktur. Sadece yeni bir <code>ReturnedState</code> sınıfı oluşturur ve ona uygun eylemleri implemente edersiniz. Bu, **Open-Closed Principle'a** mükemmel bir uyum sağlar.
+            </li>
+            <li>
+                <strong>Daha Okunabilir Kod:</strong> Karmaşık koşullu mantık yerine, her bir durumun davranışı kendi sınıfı içinde açıkça tanımlanır. Bu, kodun okunabilirliğini ve anlaşılabilirliğini artırır.
+            </li>
+            <li>
+                <strong>Durum Geçişlerinin Açık Tanımı:</strong> Durum geçişleri, Context sınıfı içinde değil, her bir durum sınıfı içinde açıkça tanımlanır. Bu, durum makinesini görselleştirmeyi ve anlamayı kolaylaştırır.
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Common Closure Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1e293b;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #3b82f6;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Common Closure Principle (CCP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Common Closure Principle (CCP)</strong>, aynı nedenlerle değişecek olan sınıfların <strong>aynı pakette</strong> tutulması gerektiğini belirtir.</p>
+      <p><em>"Bir değişiklik birden fazla sınıfı etkiliyorsa, bu sınıflar aynı pakette gruplanmalıdır."</em></p>
+      <p>Bu ilke, özellikle <strong>bakım ve sürüm yönetimi</strong> açısından önemlidir. Bir iş kuralı değiştiğinde, ilgili tüm sınıfların tek bir paket altında olması, değişikliklerin daha kolay yönetilmesini sağlar.</p>
+      <p><strong>Sonuç olarak:</strong> CCP uygulanmazsa aynı iş kuralına ait sınıflar farklı paketlere dağılır ve değişiklik yapmak karmaşık hale gelir. Uygulandığında ise <strong>değişiklikten etkilenen modüller minimize edilir</strong>.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>❌ Yanlış Kullanım (CCP ihlali)</h3>
+      <pre><code>// Payment ile ilgili sınıflar farklı paketlerde dağılmış
+com.example.user.UserPaymentValidator
+com.example.order.OrderPaymentProcessor
+com.example.logging.PaymentLogger
+</code></pre>
+
+      <h3>✅ Doğru Kullanım (CCP uygulanmış)</h3>
+      <pre><code>// payment paketi altında gruplanmış sınıflar
+com.example.payment.PaymentValidator
+com.example.payment.PaymentProcessor
+com.example.payment.PaymentLogger
+</code></pre>
+
+      <pre><code>// örnek kullanım
+package com.example.payment;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class PaymentProcessor {
+    private final PaymentValidator validator;
+
+    public PaymentProcessor(PaymentValidator validator) {
+        this.validator = validator;
+    }
+
+    public void processPayment(String user, double amount) {
+        if (validator.validate(amount)) {
+            System.out.println("Ödeme işlendi: " + user + " => " + amount);
+        }
+    }
+}
+</code></pre>
+
+      <p>Burada ödeme ile ilgili tüm sınıflar <code>payment</code> paketi altında toplanmıştır. Böylece ödeme kurallarında bir değişiklik yapılması gerektiğinde, sadece bu paket etkilenir.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Aynı iş kuralına bağlı sınıflar bir arada bulunur.</li>
+        <li>Değişikliklerin etkisi belirli paketle sınırlanır.</li>
+        <li>Bakım ve test süreçleri kolaylaşır.</li>
+        <li>Paketler daha anlamlı ve amaca uygun hale gelir.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Yönetilebilirlik:</strong> Değişiklikler belirli paketlerle sınırlandığı için daha kolay yönetilir.</li>
+        <li><strong>Bakım Kolaylığı:</strong> İlgili sınıflar aynı yerde olduğundan bakım süresi kısalır.</li>
+        <li><strong>Sadelik:</strong> Paket yapısı daha anlamlı hale gelir.</li>
+        <li><strong>Test Kolaylığı:</strong> Aynı işlevselliğe ait testler tek pakette toplanır.</li>
+        <li><strong>Versiyonlama Avantajı:</strong> İlgili modüller aynı anda güncellenebilir.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

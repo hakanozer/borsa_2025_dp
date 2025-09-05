@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stable Abstractions Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0f172a;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #ec4899;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Stable Abstractions Principle (SAP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Stable Abstractions Principle (SAP)</strong>, "Bir paket ne kadar stabilse, o kadar soyut olmalıdır" der.</p>
+      <p>Yani stabil paketler (<strong>çok kullanılan, değişmesi zor olanlar</strong>) doğrudan somut sınıflar barındırmamalıdır. Bunun yerine <strong>soyutlamalar (interface, abstract class)</strong> içermelidir.</p>
+      <p><strong>Sonuç olarak:</strong> Stabil ve soyut olan paketler değişime karşı dirençli olurken, kararsız paketler somut implementasyonları barındırarak esnekliği korur.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>❌ Yanlış Kullanım (SAP ihlali)</h3>
+      <pre><code>// core modülünde somut sınıf
+package com.example.core;
+
+public class FileLogger {
+    public void log(String message) {
+        System.out.println("[LOG] " + message);
+    }
+}
+
+// user modülü core'a bağımlı
+package com.example.user;
+
+import com.example.core.FileLogger;
+
+public class UserService {
+    private final FileLogger logger = new FileLogger();
+
+    public void register(String username) {
+        logger.log("Kullanıcı kaydedildi: " + username);
+    }
+}
+</code></pre>
+      <p>Burada <code>core</code> modülü stabil olmasına rağmen soyutlama yerine somut sınıf içeriyor.</p>
+
+      <h3>✅ Doğru Kullanım (SAP uygulanmış)</h3>
+      <pre><code>// core modülünde soyutlama
+package com.example.core;
+
+public interface Logger {
+    void log(String message);
+}
+
+// infrastructure modülü implementasyon içerir
+package com.example.infrastructure;
+
+import com.example.core.Logger;
+import org.springframework.stereotype.Service;
+
+@Service
+public class FileLogger implements Logger {
+    @Override
+    public void log(String message) {
+        System.out.println("[LOG] " + message);
+    }
+}
+
+// user modülü sadece soyutlamaya bağımlıdır
+package com.example.user;
+
+import com.example.core.Logger;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+    private final Logger logger;
+
+    public UserService(Logger logger) {
+        this.logger = logger;
+    }
+
+    public void register(String username) {
+        logger.log("Kullanıcı kaydedildi: " + username);
+    }
+}
+</code></pre>
+
+      <p>Burada <code>core</code> modülü sadece <strong>soyutlama</strong> içeriyor, somut implementasyonlar <code>infrastructure</code> gibi daha kararsız paketlerde bulunuyor.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Stabil paketler değişimden korunur.</li>
+        <li>Sistem daha modüler ve esnek hale gelir.</li>
+        <li>Bağımlılıkların yönü doğru şekilde tanımlanır.</li>
+        <li>Farklı implementasyonlar kolayca eklenebilir.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Esneklik:</strong> Yeni implementasyonlar kolayca eklenebilir.</li>
+        <li><strong>Dayanıklılık:</strong> Stabil paketler soyutlamalar sayesinde değişmeden kalabilir.</li>
+        <li><strong>Test Kolaylığı:</strong> Mock veya stub ile test etmek kolaylaşır.</li>
+        <li><strong>Genişletilebilirlik:</strong> Yeni ihtiyaçlara hızlı uyum sağlanır.</li>
+        <li><strong>Temiz Mimari:</strong> Katmanlar arası bağımlılıklar daha düzenli hale gelir.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

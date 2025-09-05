@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SOLID + Bileşen Prensipleri — Spring Boot 3.5 ile İleri Seviye</title>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f172a; --muted:#94a3b8; --text:#e2e8f0; --brand:#60a5fa; --accent:#34d399; --danger:#f87171; --warn:#fbbf24;
+      --code:#0b1020; --code-text:#d1e9ff; --shadow:0 8px 24px rgba(0,0,0,.25);
+    }
+    [data-theme="light"]{
+      --bg:#f7fafc; --panel:#ffffff; --muted:#475569; --text:#0f172a; --brand:#2563eb; --accent:#059669; --danger:#dc2626; --warn:#d97706;
+      --code:#0f172a; --code-text:#e2e8f0; --shadow:0 8px 24px rgba(2,6,23,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(15,23,42,.95),rgba(15,23,42,.85));backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid rgba(148,163,184,.15)}
+    .container{max-width:1100px;margin:0 auto;padding:0 1rem}
+    .row{display:flex;gap:1.25rem}
+    .hero{padding:1rem 0;display:flex;align-items:center;justify-content:space-between}
+    .hero h1{margin:.3rem 0;font-weight:800;font-size:1.25rem}
+    .hero .subtitle{color:var(--muted);font-size:.95rem}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;border:1px solid rgba(148,163,184,.2);padding:.55rem .9rem;border-radius:12px;color:var(--text);text-decoration:none;background:rgba(99,102,241,.08)}
+    .btn:hover{border-color:rgba(148,163,184,.35)}
+    .btn.small{padding:.35rem .6rem;border-radius:10px;font-size:.9rem}
+    .pill{padding:.2rem .5rem;border-radius:999px;background:rgba(96,165,250,.15);color:var(--brand);font-weight:600;font-size:.75rem;border:1px solid rgba(96,165,250,.25)}
+
+    main{display:grid;grid-template-columns:280px 1fr;gap:1.25rem;padding:1.25rem}
+    nav{position:sticky;top:70px;height:calc(100vh - 90px);overflow:auto;padding:.75rem;background:var(--panel);border-radius:16px;box-shadow:var(--shadow)}
+    nav h3{margin:.25rem 0 .75rem;font-size:.95rem;color:var(--muted);font-weight:700}
+    nav a{display:block;padding:.45rem .6rem;margin:.1rem 0;border-radius:10px;color:var(--text);text-decoration:none;border:1px solid transparent}
+    nav a:hover{background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.25)}
+    nav .group{margin:.6rem 0}
+    nav .group .label{font-size:.8rem;color:var(--muted);margin:.5rem .35rem}
+
+    .content{min-width:0}
+    section{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:1rem 1.2rem;margin-bottom:1rem}
+    section h2{margin:.2rem 0 .6rem;font-size:1.25rem}
+    .lead{color:var(--muted)}
+    .grid{display:grid;gap:1rem}
+    @media (min-width:900px){.grid.cols-2{grid-template-columns:1fr 1fr}}
+
+    pre{background:var(--code);color:var(--code-text);padding:1rem;border-radius:14px;overflow:auto;position:relative}
+    code{font-family:"Fira Code",ui-monospace,Consolas,Menlo,monospace;font-size:.92rem}
+    .kbd{font-family:ui-monospace,monospace;border:1px solid rgba(148,163,184,.35);border-bottom-width:3px;border-radius:6px;padding:.05rem .35rem;font-weight:700}
+    .tag{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .55rem;border-radius:999px;border:1px solid rgba(148,163,184,.25);color:var(--muted);font-size:.75rem}
+    .ok{color:var(--accent)} .bad{color:var(--danger)} .warn{color:var(--warn)}
+    .callout{border-left:4px solid var(--brand);padding:.6rem .8rem;background:rgba(96,165,250,.08);border-radius:10px}
+    .adv{display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .chip{background:rgba(15,23,42,.45);border:1px solid rgba(148,163,184,.2);padding:.4rem .6rem;border-radius:10px}
+
+    footer{padding:1.25rem;text-align:center;color:var(--muted)}
+    .muted{color:var(--muted)}
+
+    .toc{display:flex;flex-wrap:wrap;gap:.5rem}
+    .toc a{border:1px dashed rgba(148,163,184,.3);padding:.35rem .6rem;border-radius:999px;color:var(--text);text-decoration:none}
+    .toc a:hover{background:rgba(96,165,250,.12)}
+
+    .toolbar{display:flex;gap:.5rem;justify-content:flex-end;margin:.4rem 0}
+    .copy{cursor:pointer}
+
+    @media (max-width:980px){main{grid-template-columns:1fr} nav{position:relative;top:auto;height:auto}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container hero">
+      <div>
+        <div class="pill">Spring Boot 3.5 • REST API • İleri Seviye Mimari</div>
+        <h1>SOLID + Bileşen Prensipleri — Neden, Sonuç, Örnek ve Avantajlar</h1>
+        <div class="subtitle">Gerçek dünyada değişikliğin yönünü kontrol etmeye, test edilebilirliği ve sürdürülebilirliği artırmaya odaklı bir rehber.</div>
+      </div>
+      <div>
+        <a class="btn" href="https://gptonline.ai/tr/" target="_blank" rel="noopener">GPT Online ↗</a>
+        <a class="btn small" id="theme">☀︎/🌙</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav>
+      <h3>İçindekiler</h3>
+      <div class="group">
+        <div class="label">SOLID</div>
+        <a href="#srp">SRP — Single Responsibility</a>
+        <a href="#ocp">OCP — Open/Closed</a>
+        <a href="#lsp">LSP — Liskov Substitution</a>
+        <a href="#isp">ISP — Interface Segregation</a>
+        <a href="#dip">DIP — Dependency Inversion</a>
+      </div>
+      <div class="group">
+        <div class="label">Bileşen/ Paket Prensipleri</div>
+        <a href="#rep">REP — Reuse/Release Equivalency</a>
+        <a href="#ccp">CCP — Common Closure</a>
+        <a href="#crp">CRP — Common Reuse</a>
+        <a href="#adp">ADP — Acyclic Dependencies</a>
+        <a href="#sdp">SDP — Stable Dependencies</a>
+        <a href="#sap">SAP — Stable Abstractions</a>
+      </div>
+      <div class="group">
+        <div class="label">Ekler</div>
+        <a href="#kontrol-listesi">Hızlı Kontrol Listesi</a>
+        <a href="#modul-org">Maven/Gradle Örüntüsü</a>
+      </div>
+    </nav>
+
+    <div class="content">
+      <!-- SRP -->
+      <section id="srp">
+        <h2>SRP — Single Responsibility Principle</h2>
+        <p class="lead">Bir sınıfın/değerin <strong>tek bir değişim nedeni</strong> olmalı. Aynı sınıfta hem iş kuralı hem I/O (HTTP, DB, MQ) bir aradaysa, refactoring maliyetiniz logaritmik büyür.</p>
+        <div class="grid cols-2">
+          <div>
+            <div class="tag bad">❌ SRP İhlali</div>
+            <div class="toolbar"><span class="chip">koku: Anemic Domain + God Service</span></div>
+            <pre><code>package com.acme.user; // Spring Boot 3.5
+
+@Service
+public class UserService {
+  private final JdbcTemplate jdbc;
+  public UserService(JdbcTemplate jdbc){this.jdbc = jdbc;}
+
+  public void register(String email){
+    // iş kuralı
+    if(email == null || !email.contains("@")) throw new IllegalArgumentException();
+    // I/O ve mapping
+    jdbc.update("insert into users(email) values(?)", email);
+    // yan-etki: bildirim
+    System.out.println("E-posta kaydedildi: " + email);
+  }
+}
+</code></pre>
+          </div>
+          <div>
+            <div class="tag ok">✅ SRP Uygulanmış</div>
+            <div class="toolbar"><span class="chip">ayır: Policy (Domain) / Detail (Adapters)</span></div>
+            <pre><code>package com.acme.user.domain;
+public record Email(String value){
+  public Email { if(value == null || !value.contains("@")) throw new IllegalArgumentException(); }
+}
+
+// Domain policy
+@Service
+public class UserRegistration {
+  private final UserPort port; // DIP ile soyutlama
+  private final Notifier notifier;
+  public void register(Email email){
+    port.save(email);
+    notifier.send("welcome", email.value());
+  }
+}
+
+// Outbound adapter
+@Repository
+class JdbcUserAdapter implements UserPort { /* JDBC/ORM detayları */ }
+
+// Inbound adapter (REST)
+@RestController
+class UserController {
+  private final UserRegistration useCase;
+  @PostMapping("/users") void post(@RequestBody CreateUser req){
+    useCase.register(new Email(req.email()));
+  }
+}
+</code></pre>
+          </div>
+        </div>
+        <div class="adv">
+          <div class="chip">Kolay test (port'ları mockla)</div>
+          <div class="chip">Düşük yan-etki, yüksek okunabilirlik</div>
+          <div class="chip">I/O teknolojisi değişse de domain sabit</div>
+          <div class="chip">Eşzamanlı geliştirmeye uygun</div>
+        </div>
+      </section>
+
+      <!-- OCP -->
+      <section id="ocp">
+        <h2>OCP — Open/Closed Principle</h2>
+        <p class="lead">Sınıflar <strong>gelişmeye açık</strong>, <strong>değişime kapalı</strong> olmalı. Yeni iş kuralı için <em>if-else eklemek</em> yerine strateji/kompozisyonla <em>genişlet</em>.</p>
+        <div class="grid cols-2">
+          <div>
+            <div class="tag bad">❌ İhlal: if-else seli</div>
+            <pre><code>@Service
+class PricingService {
+  BigDecimal price(Order o){
+    if(o.type() == VIP) return o.base().multiply(new BigDecimal("0.8"));
+    if(o.type() == STUDENT) return o.base().multiply(new BigDecimal("0.9"));
+    if(o.type() == WHOLESALE) return o.base().multiply(new BigDecimal("0.7"));
+    return o.base();
+  }
+}
+</code></pre>
+          </div>
+          <div>
+            <div class="tag ok">✅ Strateji ile genişlet</div>
+            <pre><code>interface PricingPolicy { BigDecimal apply(Order o); }
+@Component class VipPricing implements PricingPolicy { /* ... */ }
+@Component class StudentPricing implements PricingPolicy { /* ... */ }
+
+@Service
+class PricingService {
+  private final Map&lt;OrderType, PricingPolicy&gt; policies;
+  PricingService(List&lt;PricingPolicy&gt; list){ this.policies = index(list); }
+  BigDecimal price(Order o){ return policies.getOrDefault(o.type(), o1->o1.base()).apply(o); }
+}
+</code></pre>
+          </div>
+        </div>
+        <div class="callout">Sonuç: Yeni fiyat kuralı = yeni sınıf. Mevcut sınıfa dokunulmadığı için geriye dönük hatalar minimize edilir.</div>
+      </section>
+
+      <!-- LSP -->
+      <section id="lsp">
+        <h2>LSP — Liskov Substitution Principle</h2>
+        <p class="lead">Türetilmiş tür, taban türün sözleşmesini <em>bozmadan</em> yerine geçebilmelidir. İhlal genellikle "yapamıyorsa fırlat" antipattern'iyle görülür.</p>
+        <div class="grid cols-2">
+          <div>
+            <div class="tag bad">❌ İhlal</div>
+            <pre><code>interface Storage { byte[] read(String key); void write(String key, byte[] v); }
+class ReadOnlyStorage implements Storage {
+  public byte[] read(String k){ /* ... */ }
+  public void write(String k, byte[] v){ throw new UnsupportedOperationException(); }
+}
+</code></pre>
+          </div>
+          <div>
+            <div class="tag ok">✅ Sözleşmeyi ayır</div>
+            <pre><code>interface Reader { byte[] read(String key); }
+interface Writer { void write(String key, byte[] v); }
+class ReadOnlyStorage implements Reader { /* ... */ }
+class DefaultStorage implements Reader, Writer { /* ... */ }
+</code></pre>
+          </div>
+        </div>
+        <div class="adv">
+          <div class="chip">Polimorfizm güvenilir</div>
+          <div class="chip">Daha az sürpriz/exception</div>
+          <div class="chip">Testler sade (contract test)</div>
+        </div>
+      </section>
+
+      <!-- ISP -->
+      <section id="isp">
+        <h2>ISP — Interface Segregation Principle</h2>
+        <p class="lead">İstemciler <strong>ihtiyaç duymadıkları</strong> metotlara bağımlı olmamalı. Büyük arayüzü küçük rollere böl.</p>
+        <div class="grid cols-2">
+          <div>
+            <div class="tag bad">❌ Şişkin arayüz</div>
+            <pre><code>interface ReportService { byte[] pdf(); byte[] csv(); void email(String to); }
+class CsvOnlyReport implements ReportService {
+  public byte[] pdf(){ throw new UnsupportedOperationException(); }
+  public byte[] csv(){ /* ... */ }
+  public void email(String to){ /* ... */ }
+}
+</code></pre>
+          </div>
+          <div>
+            <div class="tag ok">✅ İnce taneli arayüzler</div>
+            <pre><code>interface PdfReport { byte[] pdf(); }
+interface CsvReport { byte[] csv(); }
+interface Emailable { void email(String to); }
+class CsvOnlyReport implements CsvReport, Emailable { /* ... */ }
+</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- DIP -->
+      <section id="dip">
+        <h2>DIP — Dependency Inversion Principle</h2>
+        <p class="lead">Yüksek seviye politikalar <em>detaylara</em> değil, <strong>soyutlamalara</strong> bağımlı olmalı. Spring DI bunu kolaylaştırır; ancak <em>interface eklemek tek başına DIP değildir</em>, <strong>bağımlılık yönü</strong> önemlidir.</p>
+        <div class="grid cols-2">
+          <div>
+            <div class="tag bad">❌ Somuta bağımlı</div>
+            <pre><code>@Service class NotificationService {
+  private final EmailSender sender = new SmtpEmailSender();
+  void send(String m){ sender.send(m); }
+}
+</code></pre>
+          </div>
+          <div>
+            <div class="tag ok">✅ Port-Adapter (Hexagonal)</div>
+            <pre><code>interface MessageSender { void send(String m); }
+@Service class NotificationService { private final MessageSender sender; /* ctor */ }
+@Service class SmtpEmailSender implements MessageSender { /* ... */ }
+@Service class SmsSender implements MessageSender { /* ... */ }
+</code></pre>
+          </div>
+        </div>
+        <div class="callout">Sonuç: Yeni kanal eklemek = yeni adapter. Use-case değişmez → regresyon riski düşük.</div>
+      </section>
+
+      <!-- REP -->
+      <section id="rep">
+        <h2>REP — Reuse/Release Equivalency Principle</h2>
+        <p class="lead">Gerçek tekrar kullanım <strong>sürümleme</strong> ile mümkündür. Yeniden kullanılacak paketler <em>release edilebilir birim</em> olmalı (semver, değişim günlüğü, bağımlılık sınırları).</p>
+        <pre><code>// :common-logging (ayrı modül)
+public final class LogHelper { public static void info(String m){ /* slf4j */ } }
+
+// :user-service → dependsOn :common-logging
+@Service class UserService { void create(String n){ LogHelper.info("User:"+n); } }
+</code></pre>
+        <div class="adv">
+          <div class="chip">Sürüm izlenebilirliği</div>
+          <div class="chip">Takımlar arası paylaşım</div>
+          <div class="chip">Geriye dönük uyumluluk politikası</div>
+        </div>
+      </section>
+
+      <!-- CCP -->
+      <section id="ccp">
+        <h2>CCP — Common Closure Principle</h2>
+        <p class="lead">Aynı nedenle değişecek sınıflar <strong>aynı paket/modülde</strong> toplanmalı. Değişiklik dalgasını tek paketle sınırlarsın.</p>
+        <pre><code>// Doğru gruplama
+com.acme.payment.PaymentValidator
+com.acme.payment.PaymentProcessor
+com.acme.payment.PaymentLogger
+</code></pre>
+      </section>
+
+      <!-- CRP -->
+      <section id="crp">
+        <h2>CRP — Common Reuse Principle</h2>
+        <p class="lead">Bir pakete bağımlıysan, içindeki <em>çoğu şeyi</em> kullanabiliyor olmalısın. Alakasız sınıfları aynı pakete koyma → zorunlu bağımlılık yaratır.</p>
+        <pre><code>// Kötü: userutils { PasswordHasher, EmailValidator, CsvExporter }
+// İyi: user { PasswordHasher, EmailValidator } • export { CsvExporter }
+</code></pre>
+      </section>
+
+      <!-- ADP -->
+      <section id="adp">
+        <h2>ADP — Acyclic Dependencies Principle</h2>
+        <p class="lead">Paket bağımlılık grafiği <strong>döngüsüz</strong> olmalı. Döngü → build, test, deploy zincirini kilitler.</p>
+        <pre><code>// shared ile döngüyü kır
+:shared (PaymentGateway)
+:payment (impl PaymentGateway)
+:order → depends on :shared (sadece arayüz)
+</code></pre>
+      </section>
+
+      <!-- SDP -->
+      <section id="sdp">
+        <h2>SDP — Stable Dependencies Principle</h2>
+        <p class="lead">Daha az stabil paketler, daha stabil paketlere bağımlı olmalı. Stabilite = <em>çok kişi kullanıyor + değişmesi zor</em>.</p>
+        <pre><code>// Stabil çekirdek arayüzler :shared
+public interface MessageService { void send(String to, String msg); }
+// Kararsız implementasyonlar :notification
+@Service class EmailService implements MessageService { /* ... */ }
+// Üst seviye :user sadece :shared'e bağımlı
+</code></pre>
+      </section>
+
+      <!-- SAP -->
+      <section id="sap">
+        <h2>SAP — Stable Abstractions Principle</h2>
+        <p class="lead">Ne kadar stabilsen, o kadar <strong>soyut</strong> ol. Stabil paket somut detay tutmasın; somutlar kararsız katmanda dursun.</p>
+        <pre><code>// :core yalnızca Logger arayüzünü içerir
+public interface Logger { void log(String m); }
+// :infra somut FileLogger'ı içerir
+@Service class FileLogger implements Logger { /* ... */ }
+// :user sadece Logger soyutuna bağımlıdır
+</code></pre>
+      </section>
+
+      <!-- Kontrol Listesi -->
+      <section id="kontrol-listesi">
+        <h2>Hızlı Kontrol Listesi (Prod Öncesi)</h2>
+        <div class="grid cols-2">
+          <div>
+            <ul>
+              <li><span class="kbd">SRP</span> Her service/use-case tek sorumluluk mu?</li>
+              <li><span class="kbd">OCP</span> Yeni kural eklemek için mevcut sınıfı <em>değiştiriyor</em> musun?</li>
+              <li><span class="kbd">LSP/ISP</span> Interface'ler rol-tabanlı ve sözleşmeler tutarlı mı?</li>
+              <li><span class="kbd">DIP</span> Domain → interface, adapter → implementasyon mu?</li>
+            </ul>
+          </div>
+          <div>
+            <ul>
+              <li><span class="kbd">ADP</span> Modül grafiği döngüsüz mü?</li>
+              <li><span class="kbd">REP</span> Yeniden kullanılacak şeyler sürümleniyor mu?</li>
+              <li><span class="kbd">CCP/CRP</span> Paketler birlikte değişip birlikte kullanılıyor mu?</li>
+              <li><span class="kbd">SDP/SAP</span> Stabil = soyut, Kararsız = somut ayrımı net mi?</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Maven/Gradle öneri -->
+      <section id="modul-org">
+        <h2>Örnek Çok-Modüllü Organizasyon (Maven/Gradle)</h2>
+        <pre><code>root
+├─ :core            // SAP/SDP: yalnızca arayüzler, domain kuralları
+├─ :application     // use-case orchestrasyonu (SRP/DIP)
+├─ :adapters
+│   ├─ :web-rest    // inbound REST (Controller)
+│   ├─ :persistence // outbound (JPA/JDBC/NoSQL)
+│   └─ :messaging   // outbound (Kafka/Rabbit)
+├─ :shared          // ortak DTO/contract (dikkat: ADP döngü oluşturma!)
+└─ :platform        // starter, auto-config, ops (REP)
+</code></pre>
+        <div class="callout">İpucu: Domain modelini bağımsız tut; adapter modülleri istediğin I/O teknolojisine göre değiştir. Testlerde <em>contract test</em> ve <em>slice</em> (WebMvcTest, DataJpaTest) kullan.</div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div>Bu tek sayfalık rehber, ileri seviye ekip içi eğitimler için hazırlanmıştır. Gelişmiş içerikler için <a href="https://gptonline.ai/tr/" target="_blank" rel="noopener">GPT Online</a> adresini ziyaret edin.</div>
+    <div class="muted">© 2025</div>
+  </footer>
+
+  <script>
+    // Tema anahtarı
+    const toggle = document.getElementById('theme');
+    const set = t=>document.documentElement.setAttribute('data-theme', t);
+    const saved = localStorage.getItem('theme') || 'dark';
+    set(saved);
+    toggle.onclick = ()=>{ const t = (document.documentElement.getAttribute('data-theme')==='light'?'dark':'light'); set(t); localStorage.setItem('theme', t); };
+
+    // Kopyala butonu (tüm pre bloklarına)
+    document.querySelectorAll('pre').forEach(pre=>{
+      const btn = document.createElement('button');
+      btn.textContent = 'Kopyala';
+      btn.className = 'btn small copy';
+      btn.style.position='absolute'; btn.style.top='8px'; btn.style.right='8px';
+      pre.appendChild(btn);
+      btn.addEventListener('click', async()=>{
+        await navigator.clipboard.writeText(pre.innerText);
+        btn.textContent = '✓'; setTimeout(()=>btn.textContent='Kopyala',1000);
+      });
+    });
+  </script>
+</body>
+</html>

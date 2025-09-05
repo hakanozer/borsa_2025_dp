@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acyclic Dependencies Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0f172a;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #10b981;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Acyclic Dependencies Principle (ADP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Acyclic Dependencies Principle (ADP)</strong>, bağımlılıklar arasında <strong>döngüsel ilişkilerin olmaması gerektiğini</strong> belirtir.</p>
+      <p><em>"Paketler arası bağımlılık grafiği döngüsüz olmalıdır."</em></p>
+      <p>Yani, <code>Package A → Package B → Package C → Package A</code> gibi bir döngü olmamalıdır. Döngüler, <strong>bağımlılık cehennemi</strong> (dependency hell) yaratır ve değişiklikleri yönetilemez hale getirir.</p>
+      <p><strong>Sonuç olarak:</strong> ADP uygulanmadığında, bir paketteki küçük bir değişiklik, dolaylı yoldan kendi üzerine geri döner. Uygulandığında ise bağımlılıklar <strong>yönlü ve yönetilebilir</strong> hale gelir.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>❌ Yanlış Kullanım (ADP ihlali)</h3>
+      <pre><code>// Döngüsel bağımlılık
+com.example.user → com.example.order → com.example.payment → com.example.user
+</code></pre>
+      <p>Burada <code>User</code> paketi, <code>Order</code>'a bağımlı, <code>Order</code> ise <code>Payment</code>'a bağımlı, <code>Payment</code> ise tekrar <code>User</code>'a bağımlı hale gelmiş. Bu durum değişiklikleri yönetilemez hale getirir.</p>
+
+      <h3>✅ Doğru Kullanım (ADP uygulanmış)</h3>
+      <pre><code>// Ortak bağımlılıkların soyutlanması
+com.example.user
+com.example.order
+com.example.payment
+com.example.shared (ortak bağımlılıklar burada)
+</code></pre>
+
+      <pre><code>// shared modülünde Interface tanımlanır
+package com.example.shared;
+
+public interface PaymentGateway {
+    void process(double amount);
+}
+
+// payment modülü implement eder
+package com.example.payment;
+
+import com.example.shared.PaymentGateway;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PaymentService implements PaymentGateway {
+    public void process(double amount) {
+        System.out.println("Ödeme işlendi: " + amount);
+    }
+}
+
+// order modülü sadece interface'e bağımlı olur
+package com.example.order;
+
+import com.example.shared.PaymentGateway;
+import org.springframework.stereotype.Service;
+
+@Service
+public class OrderService {
+    private final PaymentGateway paymentGateway;
+
+    public OrderService(PaymentGateway paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
+
+    public void placeOrder(double amount) {
+        paymentGateway.process(amount);
+    }
+}
+</code></pre>
+
+      <p>Burada ortak bağımlılıklar <code>shared</code> paketine taşınarak bağımlılık döngüsü kırılmıştır.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Döngüsel bağımlılıklar ortadan kaldırılır.</li>
+        <li>Bağımlılık grafiği yönlü ve anlaşılır olur.</li>
+        <li>Değişiklikler daha kolay yönetilir.</li>
+        <li>Kod tabanı daha esnek ve ölçeklenebilir hale gelir.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Bağımlılık Yönetimi:</strong> Döngüsüz bağımlılıklar, modüllerin birbirinden bağımsız gelişmesini sağlar.</li>
+        <li><strong>Bakım Kolaylığı:</strong> Değişiklikler sınırlı etki alanına sahip olur.</li>
+        <li><strong>Test Kolaylığı:</strong> Modüller bağımsız test edilebilir.</li>
+        <li><strong>Modülerlik:</strong> Paketler arasındaki sınırlar daha net belirlenir.</li>
+        <li><strong>Ölçeklenebilirlik:</strong> Yeni modüller eklenirken döngü riski minimize edilir.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

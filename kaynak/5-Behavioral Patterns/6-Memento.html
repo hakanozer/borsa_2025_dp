@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot ve REST API ile Memento Tasarım Deseni</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #005f99;
+            --secondary-color: #f0f0f0;
+            --text-color: #333;
+            --light-text-color: #666;
+            --bg-color: #fff;
+            --card-bg-color: #fafafa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            color: var(--light-text-color);
+            font-size: 1.1em;
+        }
+
+        .content h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-size: 1.8em;
+        }
+
+        .content h3 {
+            color: var(--text-color);
+            font-weight: 700;
+            margin-top: 30px;
+            font-size: 1.4em;
+        }
+
+        .content p {
+            margin-bottom: 20px;
+        }
+
+        .code-block {
+            background-color: var(--card-bg-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95em;
+        }
+
+        .benefit-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .benefit-list li {
+            background: var(--card-bg-color);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--primary-color);
+            position: relative;
+        }
+
+        .benefit-list li strong {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .content h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Spring Boot ve REST API ile Memento Tasarım Deseni</h1>
+        <p>Gelişmiş Yazılımcılar için Nesne Durumlarını Geri Yükleyebilme Yeteneği</p>
+    </header>
+
+    <div class="content">
+        <h2>Memento Nedir?</h2>
+        <p><strong>Memento</strong>, GoF (Gang of Four) tarafından tanımlanmış bir <strong>davranışsal (behavioral)</strong> tasarım desenidir. Bu desenin temel amacı, bir nesnenin iç durumunu, o nesnenin dışına çıkarmadan ve kapsülleme (encapsulation) prensibini ihlal etmeden kaydetmek ve daha sonra bu duruma geri yükleyebilmektir. Memento, bir nesnenin mevcut anlık görüntüsünü (snapshot) alır ve bu anlık görüntüyü ayrı bir nesne (memento) içinde saklar.</p>
+
+        <p>Desen üç ana bileşenden oluşur:
+        <ul>
+            <li><strong>Originator (Başlatan):</strong> Durumu kaydedilmesi gereken nesnedir. Bir memento nesnesi oluşturur ve iç durumunu ona kaydeder. Ayrıca bir mementodan önceki durumunu geri yükleyebilir.</li>
+            <li><strong>Memento (Anlık Görüntü):</strong> Originator nesnesinin durumunun bir anlık görüntüsünü tutan nesnedir. Memento nesnesi genellikle sadece originator tarafından erişilebilir olmalıdır, böylece dış nesneler originator'ın iç durumunu değiştiremez.</li>
+            <li><strong>Caretaker (Koruyucu):</strong> Memento'yu saklayan nesnedir. Memento nesnesini ne zaman alacağını ve ne zaman geri yükleyeceğini bilir. Caretaker, memento'nun içeriği hakkında hiçbir bilgiye sahip değildir ve sadece onu bir "kara kutu" (black box) gibi ele alır.</li>
+        </ul></p>
+
+        ---
+
+        <h2>Neden ve Ne Zaman Kullanılmalı? (Neden-Sonuç İlişkisi)</h2>
+        <p>Bir REST API bağlamında, bir isteğin sonucunun geri alınabilir olması (undo), geçmiş versiyonlara erişim sağlanması veya bir işlemin durumunu geçici olarak kaydetmek ve daha sonra devam ettirmek gerekebilir. Bu durumun neden-sonuç ilişkisini aşağıdaki senaryo üzerinden inceleyelim:</p>
+        
+        <p><strong>Senaryo:</strong> Bir doküman yönetim sistemi API'si geliştirdiğinizi düşünün. Kullanıcılar bir dokümanı düzenlerken, yaptıkları değişiklikleri "geri alabilmeli" (undo) veya dokümanın önceki versiyonlarını görebilmelidir. Her bir "kaydet" işlemi yeni bir versiyon oluşturacak ve bu versiyonların geri yüklenmesi mümkün olmalıdır.</p>
+        
+        <p><strong>Yetersiz Yaklaşım (Durumu doğrudan kaydetme):</strong> Eğer Memento deseni kullanılmazsa, bir dokümanın durumunu yönetmek için iç durumunu doğrudan kontrolcü veya servis katmanında yönetmeye çalışırız:</p>
+
+        <div class="code-block">
+            <pre>
+@Service
+public class DocumentService {
+    private Document currentDocument;
+    // Geçmiş versiyonları yönetmek için karmaşık bir yapı
+    private Stack&lt;Document&gt; history = new Stack&lt;&gt;();
+
+    public void editDocument(String content) {
+        history.push(currentDocument); // Tüm doküman nesnesini kopyala
+        currentDocument.setContent(content);
+    }
+    
+    public void undo() {
+        this.currentDocument = history.pop();
+    }
+}
+            </pre>
+        </div>
+
+        <p><strong>Sonuç:</strong> Bu yaklaşım, birincisi **kapsülleme (encapsulation)** prensibini ihlal eder. <code>DocumentService</code>, <code>Document</code> nesnesinin iç yapısını bilmek ve onu yönetmek zorundadır. İkincisi, nesnenin tamamının kopyalanması ve bellekte tutulması **performans ve bellek yönetimi açısından çok verimsizdir**. Her değişiklikte tüm nesnenin (büyük bir doküman olabilir) kopyasını oluşturmak gereksiz kaynak tüketimine neden olur.</p>
+
+        <p><strong>Memento Çözümü:</strong> Bu sorunu çözmek için, doküman (Originator) nesnesinin kendisi durumunu kaydetme ve geri yükleme sorumluluğunu üstlenir. Bir <code>DocumentMemento</code> nesnesi, dokümanın sadece gerekli durumunu (örneğin, içerik, son düzenleme tarihi vb.) tutar. Bu memento nesneleri bir ** caretaker** sınıfı (örneğin, <code>VersionManager</code>) tarafından yönetilir.</p>
+        
+        <p><strong>Adımlar:</strong></p>
+        <ol>
+            <li>Originator (<code>Document</code>) sınıfını oluşturun. Bu sınıf, durumunu kaydedecek bir <code>saveState()</code> metodu ve bir mementodan durumunu geri yükleyecek bir <code>restoreState()</code> metodu içerir.</li>
+            <li>Memento (<code>DocumentMemento</code>) sınıfını oluşturun. Bu sınıf, dokümanın durum verilerini (örneğin, <code>String content</code>, <code>Date lastEditDate</code>) içerecek. Bu sınıfın iç yapısı dış dünyaya kapalı olmalıdır.</li>
+            <li>Caretaker (<code>VersionManager</code>) sınıfını oluşturun. Bu sınıf, memento nesnelerini bir koleksiyonda (örneğin, bir <code>Stack</code>) tutar ve API katmanından gelen isteklere göre memento'ları yönetir.</li>
+        </ol>
+
+        <div class="code-block">
+            <pre>
+// 1. Originator: Document.java
+public class Document {
+    private String content;
+    private Date lastEditDate;
+
+    public Document(String content) {
+        this.content = content;
+        this.lastEditDate = new Date();
+    }
+
+    // Durumu kaydeden metot
+    public DocumentMemento saveState() {
+        return new DocumentMemento(this.content, this.lastEditDate);
+    }
+    
+    // Durumu geri yükleyen metot
+    public void restoreState(DocumentMemento memento) {
+        this.content = memento.getContent();
+        this.lastEditDate = memento.getSavedDate();
+    }
+    // getters/setters...
+}
+
+// 2. Memento: DocumentMemento.java
+@Data // Lombok
+@AllArgsConstructor
+public class DocumentMemento {
+    private final String content;
+    private final Date savedDate;
+}
+
+// 3. Caretaker: VersionManager.java
+@Service
+public class VersionManager {
+    private final Map&lt;Long, Stack&lt;DocumentMemento&gt;&gt; history = new ConcurrentHashMap&lt;&gt;();
+
+    public void saveVersion(Long documentId, Document document) {
+        history.computeIfAbsent(documentId, k -> new Stack&lt;&gt;()).push(document.saveState());
+    }
+
+    public DocumentMemento undo(Long documentId) {
+        Stack&lt;DocumentMemento&gt; documentHistory = history.get(documentId);
+        if (documentHistory != null &amp;&amp; documentHistory.size() &gt; 1) {
+            documentHistory.pop(); // Mevcut durumu at
+            return documentHistory.peek(); // Bir önceki duruma dön
+        }
+        return null;
+    }
+}
+            </pre>
+        </div>
+
+        <p><strong>API Kontrolcü Kullanımı:</strong></p>
+        
+        <div class="code-block">
+            <pre>
+@RestController
+@RequestMapping("/documents")
+public class DocumentController {
+    private final VersionManager versionManager;
+    private final DocumentRepository documentRepository;
+
+    @Autowired
+    public DocumentController(VersionManager versionManager, DocumentRepository documentRepository) {
+        this.versionManager = versionManager;
+        this.documentRepository = documentRepository;
+    }
+
+    @PostMapping("/{id}/edit")
+    public ResponseEntity&lt;?&gt; editDocument(@PathVariable Long id, @RequestBody String content) {
+        Document document = documentRepository.findById(id).orElseThrow();
+        versionManager.saveVersion(id, document); // Durumu kaydet
+        document.setContent(content);
+        documentRepository.save(document);
+        return ResponseEntity.ok("Document edited.");
+    }
+    
+    @PostMapping("/{id}/undo")
+    public ResponseEntity&lt;?&gt; undoChanges(@PathVariable Long id) {
+        Document document = documentRepository.findById(id).orElseThrow();
+        DocumentMemento previousState = versionManager.undo(id);
+        if (previousState != null) {
+            document.restoreState(previousState);
+            documentRepository.save(document);
+            return ResponseEntity.ok("Changes undone.");
+        }
+        return ResponseEntity.badRequest().body("No changes to undo.");
+    }
+}
+            </pre>
+        </div>
+
+        ---
+
+        <h2>Kullanılmasının Sağlayacağı Faydalar</h2>
+        <ul class="benefit-list">
+            <li>
+                <strong>Kapsüllemeyi Koruma (Encapsulation):</strong> Memento deseni, Originator nesnesinin iç durumunu ifşa etmeden dışarıya bir anlık görüntü sunar. Caretaker (<code>VersionManager</code>) sadece memento nesnesini tutar, onun içindeki verilere erişemez ve bu verileri değiştiremez. Bu, kodun güvenliğini ve tasarımın temizliğini artırır.
+            </li>
+            <li>
+                <strong>Geri Alma ve Yenileme Yeteneği:</strong> Geri alınabilir (undoable) işlemler veya geçmiş versiyonlara erişim gibi özellikler, bu desenin doğal bir sonucudur. Caretaker, memento nesnelerini bir yığın (stack) veya liste yapısında tutarak bu işlevselliği kolayca implemente edebilir.
+            </li>
+            <li>
+                <strong>Gevşek Bağlılık:</strong> Originator (<code>Document</code>) ve Caretaker (<code>VersionManager</code>) arasındaki tek bağımlılık, <code>DocumentMemento</code> nesnesidir. İki nesne birbirinin metodlarını çağırmak zorunda kalmaz, bu da sistemin daha az bağımlı ve esnek olmasını sağlar.
+            </li>
+            <li>
+                <strong>Performans:</strong> Memento deseni, yalnızca nesnenin değişen veya kritik durumunu kaydederek bellek kullanımını optimize etmeye yardımcı olur. Tüm nesnenin kopyalanması yerine, sadece gerekli durumun kopyalanması sağlanır.
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

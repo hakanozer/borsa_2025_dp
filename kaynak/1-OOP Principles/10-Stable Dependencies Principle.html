@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stable Dependencies Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1e293b;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #3b82f6;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Stable Dependencies Principle (SDP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Stable Dependencies Principle (SDP)</strong>, "Daha az stabil olan paketler, daha stabil olanlara bağımlı olmalıdır." der.</p>
+      <p>Stabilite, bir paketin ne kadar değişmeyeceği ile ilgilidir. Eğer bir paket birçok paket tarafından kullanılıyorsa, o paket <strong>stabil</strong> kabul edilir ve değişmesi zor olmalıdır.</p>
+      <p><strong>Sonuç olarak:</strong> SDP uygulanmadığında, kararsız bir pakete bağımlılık, tüm sistemi kırılgan hale getirir. Uygulandığında ise bağımlılıklar <strong>daha dayanıklı</strong> bir yapıya kavuşur.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>❌ Yanlış Kullanım (SDP ihlali)</h3>
+      <pre><code>// notification paketi birçok pakete bağımlı
+com.example.notification → com.example.user
+com.example.notification → com.example.order
+</code></pre>
+      <p>Burada <code>notification</code> modülü kararsızdır çünkü sürekli değişebilecek <code>user</code> ve <code>order</code> modüllerine bağımlıdır.</p>
+
+      <h3>✅ Doğru Kullanım (SDP uygulanmış)</h3>
+      <pre><code>// shared paketi stabil bağımlılık içeriyor
+com.example.shared (EmailService, SmsService interfaces)
+com.example.notification (shared kullanır)
+com.example.user (notification'a değil shared'e bağımlıdır)
+</code></pre>
+
+      <pre><code>// shared modülünde interface
+package com.example.shared;
+
+public interface MessageService {
+    void sendMessage(String to, String message);
+}
+
+// notification modülü implement eder
+package com.example.notification;
+
+import com.example.shared.MessageService;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailService implements MessageService {
+    @Override
+    public void sendMessage(String to, String message) {
+        System.out.println("Email gönderildi: " + to + " → " + message);
+    }
+}
+
+// user modülü stabil shared'e bağımlı olur
+package com.example.user;
+
+import com.example.shared.MessageService;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+    private final MessageService messageService;
+
+    public UserService(MessageService messageService) {
+        this.messageService = messageService;
+    }
+
+    public void registerUser(String email) {
+        System.out.println("Kullanıcı kaydedildi: " + email);
+        messageService.sendMessage(email, "Hoşgeldiniz!");
+    }
+}
+</code></pre>
+
+      <p>Burada kararsız bağımlılık zinciri kırılmış ve <code>shared</code> paketi stabil bağımlılık noktası olarak kullanılmıştır.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Kararsız bağımlılıklar ortadan kaldırılır.</li>
+        <li>Daha stabil paketler sistemin merkezine konumlanır.</li>
+        <li>Değişikliklerin etkisi minimize edilir.</li>
+        <li>Kod tabanı daha dayanıklı hale gelir.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Dayanıklılık:</strong> Değişikliklerin en az hasarla yönetilmesini sağlar.</li>
+        <li><strong>Bakım Kolaylığı:</strong> Stabil paketler, sistemin temel taşları olur.</li>
+        <li><strong>Test Edilebilirlik:</strong> Stabil bağımlılıklar sayesinde sistem daha kolay test edilir.</li>
+        <li><strong>Ölçeklenebilirlik:</strong> Yeni modüller stabil yapıya rahatlıkla entegre edilebilir.</li>
+        <li><strong>Güvenilirlik:</strong> Sistemin çökme riskini azaltır.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

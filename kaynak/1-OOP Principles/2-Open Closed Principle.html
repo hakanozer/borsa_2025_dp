@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Closed Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #16a34a;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Open Closed Principle (OCP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Open/Closed Principle</strong>, SOLID prensiplerinin ikincisidir ve sınıfların <strong>gelişime açık</strong> ama <strong>değişime kapalı</strong> olması gerektiğini söyler. Yani mevcut kodu değiştirmeden yeni işlevler ekleyebilmeliyiz.</p>
+      <p>Spring Boot projelerinde OCP’ye uymak, <strong>uzun vadeli sürdürülebilirliği</strong> sağlar. Yeni bir özellik eklemek için mevcut sınıfları değiştirmek yerine onları genişletecek yeni sınıflar yazmak, hem <em>geriye dönük uyumluluğu</em> hem de <em>bakımı</em> kolaylaştırır.</p>
+      <p><strong>Sonuç olarak:</strong> OCP uygulanmazsa, yeni özellik eklerken eski kod sürekli değiştirilir ve hata riskleri artar. Uygulanırsa ise sistem modüler, esnek ve güvenilir olur.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+      <p>Aşağıda OCP’nin ihlal edildiği ve doğru şekilde uygulandığı örnekler verilmiştir:</p>
+
+      <h3>❌ Yanlış Kullanım (OCP ihlali)</h3>
+      <pre><code>package com.example.demo.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class PaymentService {
+
+    public void processPayment(String type) {
+        if ("credit".equals(type)) {
+            System.out.println("Kredi kartı ile ödeme işlendi.");
+        } else if ("paypal".equals(type)) {
+            System.out.println("PayPal ile ödeme işlendi.");
+        } else if ("bitcoin".equals(type)) {
+            System.out.println("Bitcoin ile ödeme işlendi.");
+        }
+    }
+}
+</code></pre>
+
+      <h3>✅ Doğru Kullanım (OCP uygulanmış)</h3>
+      <pre><code>package com.example.demo.strategy;
+
+public interface PaymentStrategy {
+    void pay();
+}
+
+// Farklı ödeme yöntemleri
+public class CreditCardPayment implements PaymentStrategy {
+    public void pay() {
+        System.out.println("Kredi kartı ile ödeme işlendi.");
+    }
+}
+
+public class PayPalPayment implements PaymentStrategy {
+    public void pay() {
+        System.out.println("PayPal ile ödeme işlendi.");
+    }
+}
+
+public class BitcoinPayment implements PaymentStrategy {
+    public void pay() {
+        System.out.println("Bitcoin ile ödeme işlendi.");
+    }
+}
+
+// Service
+package com.example.demo.service;
+
+import com.example.demo.strategy.PaymentStrategy;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PaymentService {
+    private final PaymentStrategy paymentStrategy;
+
+    public PaymentService(PaymentStrategy paymentStrategy) {
+        this.paymentStrategy = paymentStrategy;
+    }
+
+    public void processPayment() {
+        paymentStrategy.pay();
+    }
+}
+</code></pre>
+
+      <p>Bu yapıda mevcut <code>PaymentService</code> sınıfı değiştirilmeden yeni ödeme yöntemleri eklenebilir. Örneğin <code>ApplePayPayment</code> sınıfı ekleyerek genişletme yapabiliriz.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Kodun genişletilebilirliği artar, yeni özellikler kolay eklenir.</li>
+        <li>Mevcut kod değiştirilmediği için hata riski azalır.</li>
+        <li>Farklı stratejiler veya iş kuralları kolayca entegre edilebilir.</li>
+        <li>Refactoring ihtiyacı azalır, bakım süresi kısalır.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Modülerlik:</strong> Yeni işlevler mevcut kodu bozmadan eklenebilir.</li>
+        <li><strong>Test Edilebilirlik:</strong> Farklı stratejiler unit test ile kolayca test edilir.</li>
+        <li><strong>Risk Yönetimi:</strong> Yeni özellik eklerken geriye dönük hataların önüne geçilir.</li>
+        <li><strong>Esneklik:</strong> Sistem iş ihtiyaçlarına göre kolayca adapte edilebilir.</li>
+        <li><strong>Uzun Vadeli Sürdürülebilirlik:</strong> Kod tabanı büyüse bile karmaşıklık kontrol altında tutulur.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

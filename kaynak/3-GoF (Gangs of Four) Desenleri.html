@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GoF Design Patterns - İleri Seviye Yazılım Eğitimi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-cyan-600 to-blue-700 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold">GoF (Gang of Four) Design Patterns</h1>
+      <p class="mt-2 text-lg opacity-90">Spring Boot 3.5 REST API Perspektifinden</p>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-12">
+    <!-- Genel Açıklama -->
+    <section class="mb-12">
+      <div class="bg-white p-6 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Genel Bakış</h2>
+        <p class="leading-relaxed">
+          GoF (Gang of Four) tarafından tanımlanan <strong>23 Design Pattern</strong>, 
+          yazılım geliştirme sürecinde tekrar eden problemler için kanıtlanmış çözümler sunar. 
+          Bu desenler; <em>Creational, Structural ve Behavioral</em> olarak üç ana kategoriye ayrılır.
+        </p>
+        <p class="mt-4">
+          İleri seviye yazılım geliştiriciler için bu desenler, 
+          <strong>sürdürülebilirlik, genişletilebilirlik, test edilebilirlik ve performans</strong> 
+          gibi konularda kritik faydalar sağlar.
+        </p>
+      </div>
+    </section>
+
+    <!-- Creational Patterns -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-blue-700 mb-6">1. Creational Patterns</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Factory Method -->
+        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition">
+          <h3 class="text-xl font-bold text-cyan-700 mb-3">Factory Method</h3>
+          <p><strong>Neden?</strong> Nesne oluşturma mantığını merkezileştirir.</p>
+          <p class="mt-2"><strong>Sonuç:</strong> API response üretiminde farklı formatların yönetimi kolaylaşır.</p>
+        </div>
+        <!-- Abstract Factory -->
+        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition">
+          <h3 class="text-xl font-bold text-cyan-700 mb-3">Abstract Factory</h3>
+          <p><strong>Neden?</strong> Birbiriyle ilişkili nesne ailelerini soyutlamak gerekir.</p>
+          <p class="mt-2"><strong>Sonuç:</strong> Örneğin farklı DB provider’lar için yapı taşlarını standartlaştırır.</p>
+        </div>
+        <!-- Singleton -->
+        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition">
+          <h3 class="text-xl font-bold text-cyan-700 mb-3">Singleton</h3>
+          <p><strong>Neden?</strong> Tek bir instance paylaşımı gerektiğinde.</p>
+          <p class="mt-2"><strong>Sonuç:</strong> Spring IoC Container ile doğal olarak desteklenir.</p>
+        </div>
+        <!-- Builder -->
+        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition">
+          <h3 class="text-xl font-bold text-cyan-700 mb-3">Builder</h3>
+          <p><strong>Neden?</strong> Karmaşık nesne oluşturma süreçlerinde.</p>
+          <p class="mt-2"><strong>Sonuç:</strong> Immutable DTO objeleri rahatça inşa edilir.</p>
+        </div>
+        <!-- Prototype -->
+        <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition">
+          <h3 class="text-xl font-bold text-cyan-700 mb-3">Prototype</h3>
+          <p><strong>Neden?</strong> Nesne kopyalamak maliyetli ise.</p>
+          <p class="mt-2"><strong>Sonuç:</strong> Örnek konfigürasyonların klonlanması hız kazandırır.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Structural Patterns -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-green-700 mb-6">2. Structural Patterns</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-green-700 mb-3">Adapter</h3>
+          <p>Farklı arayüzlere sahip bileşenleri entegre eder. Örn: REST API → Legacy SOAP dönüşümü.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-green-700 mb-3">Decorator</h3>
+          <p>Davranış eklemeyi runtime’a taşır. Örn: Request logging, caching.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-green-700 mb-3">Facade</h3>
+          <p>Karmaşık sistemlere basit bir API sunar. Örn: Çoklu mikroservis çağrılarını tek endpoint’te toplamak.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-green-700 mb-3">Proxy</h3>
+          <p>Nesneye erişimi kontrol eder. Örn: Security interceptor veya caching proxy.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-green-700 mb-3">Composite</h3>
+          <p>Ağaç yapılarındaki hiyerarşiyi tekil-çoğul aynı şekilde ele alır. Örn: Menü sistemleri.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-green-700 mb-3">Bridge</h3>
+          <p>Soyutlama ile implementasyonu ayırır. Örn: Farklı mesaj gönderim yöntemlerinin aynı API’den yönetimi.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-green-700 mb-3">Flyweight</h3>
+          <p>Çok sayıda nesneyi paylaşarak memory tüketimini azaltır. Örn: Cache edilmiş response objeleri.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Behavioral Patterns -->
+    <section>
+      <h2 class="text-2xl font-bold text-purple-700 mb-6">3. Behavioral Patterns</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Observer</h3>
+          <p>Bir nesnedeki değişiklikleri diğerlerine bildirir. Örn: Event-driven microservices.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Strategy</h3>
+          <p>Algoritmaları runtime’da seçilebilir yapar. Örn: Farklı ödeme sağlayıcıları.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Command</h3>
+          <p>İstekleri nesne olarak kapsüller. Örn: Undo/Redo işlemleri.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Chain of Responsibility</h3>
+          <p>Sorumlulukları zincirleme devreder. Örn: Request filter zincirleri.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Mediator</h3>
+          <p>Objeler arası iletişimi merkezileştirir. Örn: Messaging hub.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Template Method</h3>
+          <p>Algoritma iskeletini tanımlar, adımlar alt sınıflarca özelleştirilir. Örn: Abstract Service sınıfları.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">State</h3>
+          <p>Nesnenin davranışını durumuna göre değiştirir. Örn: Sipariş durum yönetimi.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Visitor</h3>
+          <p>Yeni operasyonları nesne yapısını değiştirmeden ekler. Örn: AST traversal.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Interpreter</h3>
+          <p>Domain-specific language yorumlar. Örn: Query parser.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Iterator</h3>
+          <p>Koleksiyon elemanlarını sırayla dolaşmayı soyutlar. Örn: Custom collection traversal.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+          <h3 class="text-xl font-bold text-purple-700 mb-3">Memento</h3>
+          <p>Nesne durumunu kaydeder ve geri yükler. Örn: Kullanıcı tercihlerini geri alma.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 text-center py-6 mt-12">
+    <p>&copy; 2025 İleri Seviye Yazılım Eğitimi - GoF Design Patterns</p>
+  </footer>
+</body>
+</html>

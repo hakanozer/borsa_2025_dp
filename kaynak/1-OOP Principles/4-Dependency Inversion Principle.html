@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dependency Inversion Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #9333ea;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dependency Inversion Principle (DIP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Dependency Inversion Principle</strong>, SOLID prensiplerinin beşincisidir ve yüksek seviyeli modüllerin düşük seviyeli modüllere bağımlı olmaması gerektiğini söyler. Bunun yerine, her ikisi de <strong>soyutlamalara</strong> bağımlı olmalıdır.</p>
+      <p>Başka bir deyişle: <em>"Sınıflar, somut sınıflara değil, arayüzlere veya abstrakt sınıflara bağımlı olmalıdır."</em></p>
+      <p>Spring Boot projelerinde DIP genellikle <strong>Dependency Injection</strong> ve <strong>Inversion of Control</strong> mekanizmaları ile uygulanır. Bu sayede kod modülerleşir, test edilebilirlik artar ve bağımlılıklar gevşer.</p>
+      <p><strong>Sonuç olarak:</strong> DIP uygulanmazsa, üst seviye iş mantığı sınıfları alt seviye implementasyonlara sıkı sıkıya bağlı olur. Bu da değişiklik maliyetini artırır. DIP uygulanırsa sistem daha <strong>esnek, genişletilebilir ve bağımsız</strong> olur.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>❌ Yanlış Kullanım (DIP ihlali)</h3>
+      <pre><code>package com.example.demo.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class NotificationService {
+
+    private final EmailSender emailSender = new EmailSender();
+
+    public void send(String message) {
+        emailSender.sendEmail(message);
+    }
+}
+
+class EmailSender {
+    public void sendEmail(String message) {
+        System.out.println("Email gönderildi: " + message);
+    }
+}
+</code></pre>
+
+      <h3>✅ Doğru Kullanım (DIP uygulanmış)</h3>
+      <pre><code>package com.example.demo.service;
+
+import org.springframework.stereotype.Service;
+
+public interface MessageSender {
+    void send(String message);
+}
+
+@Service
+public class EmailSender implements MessageSender {
+    public void send(String message) {
+        System.out.println("Email gönderildi: " + message);
+    }
+}
+
+@Service
+public class SmsSender implements MessageSender {
+    public void send(String message) {
+        System.out.println("SMS gönderildi: " + message);
+    }
+}
+
+@Service
+public class NotificationService {
+
+    private final MessageSender messageSender;
+
+    // Constructor Injection
+    public NotificationService(MessageSender messageSender) {
+        this.messageSender = messageSender;
+    }
+
+    public void notify(String message) {
+        messageSender.send(message);
+    }
+}
+</code></pre>
+
+      <p>Burada <code>NotificationService</code> artık doğrudan <code>EmailSender</code> veya <code>SmsSender</code> sınıfına bağımlı değil. Sadece <code>MessageSender</code> arayüzüne bağımlı. Yeni bir gönderim yöntemi eklenmek istenirse (<code>PushSender</code> gibi), mevcut kod değiştirilmeden genişletilebilir.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Bağımlılıklar gevşer, üst seviye sınıflar alt seviye detaylara bağımlı olmaz.</li>
+        <li>Yeni implementasyonlar eklemek kolaylaşır.</li>
+        <li>Mock ve stub kullanarak test yazmak basitleşir.</li>
+        <li>Kodun modülerliği ve okunabilirliği artar.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Esneklik:</strong> Yeni bağımlılıklar kolayca sisteme eklenir.</li>
+        <li><strong>Test Edilebilirlik:</strong> Mock nesneler ile kolayca unit test yazılır.</li>
+        <li><strong>Uzun Vadeli Sürdürülebilirlik:</strong> Bağımlılıklar soyutlamalara dayandığı için sistem büyüdükçe karmaşıklık azalır.</li>
+        <li><strong>Kolay Bakım:</strong> Alt seviye implementasyon değişse bile üst seviye mantık etkilenmez.</li>
+        <li><strong>Modülerlik:</strong> Kod parçaları bağımsız geliştirilebilir ve yönetilebilir.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

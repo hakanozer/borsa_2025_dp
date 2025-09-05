@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Common Reuse Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #f59e0b;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Common Reuse Principle (CRP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Common Reuse Principle (CRP)</strong>, "Bir paketi kullanan, onun içindeki tüm sınıfları kullanmalıdır." ilkesini ortaya koyar.</p>
+      <p>Yani, bir pakete bağımlı olan başka bir modül, o paketteki <strong>tüm sınıfları</strong> kullanmaya hazır olmalıdır. Eğer bir paketteki sınıfların sadece küçük bir kısmı kullanılıyorsa, paketleme yanlış yapılmış demektir.</p>
+      <p><strong>Sonuç olarak:</strong> CRP uygulanmadığında, bir pakete küçük bir değişiklik yapılması, gereksiz bağımlılıklar nedeniyle diğer modülleri de etkileyebilir. Uygulandığında ise bağımlılıklar minimize edilir ve <strong>gereksiz etki alanları engellenir</strong>.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>❌ Yanlış Kullanım (CRP ihlali)</h3>
+      <pre><code>// user-utils paketi
+com.example.userutils.PasswordHasher
+com.example.userutils.EmailValidator
+com.example.userutils.CsvExporter
+</code></pre>
+      <p>Burada <code>CsvExporter</code>, kullanıcı işlemleri ile ilgisi olmayan bir sınıfı <code>userutils</code> paketi içinde bulunduruyor. Başka bir modül <code>EmailValidator</code>'ı kullanmak istediğinde, <code>CsvExporter</code>'a da bağımlı hale gelir.</p>
+
+      <h3>✅ Doğru Kullanım (CRP uygulanmış)</h3>
+      <pre><code>// user paketi
+com.example.user.PasswordHasher
+com.example.user.EmailValidator
+
+// export paketi
+com.example.export.CsvExporter
+</code></pre>
+
+      <pre><code>// EmailValidator kullanımı
+package com.example.user;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class EmailValidator {
+    public boolean isValid(String email) {
+        return email != null && email.contains("@");
+    }
+}
+</code></pre>
+
+      <p>Burada her paket sadece kendi sorumluluk alanındaki sınıfları içeriyor. Böylece bağımlılıklar doğru yönetiliyor ve gereksiz etkiler ortadan kalkıyor.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Bir paket değiştiğinde, sadece gerçekten ihtiyaç duyan modüller etkilenir.</li>
+        <li>Paketler anlamlı bir şekilde bölünmüş olur.</li>
+        <li>Gereksiz bağımlılıklar ortadan kaldırılır.</li>
+        <li>Yeniden kullanılabilirlik artar.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Bağımlılıkların Azaltılması:</strong> Sadece gerekli olan modüller bağımlı hale gelir.</li>
+        <li><strong>Bakım Kolaylığı:</strong> Gereksiz bağımlılıkların ortadan kalkması, bakım maliyetini düşürür.</li>
+        <li><strong>Yüksek Modülerlik:</strong> Kod tabanı daha esnek hale gelir.</li>
+        <li><strong>Sadelik:</strong> Paketler kendi sorumluluk alanlarında kalır.</li>
+        <li><strong>Yeniden Kullanılabilirlik:</strong> Bağımsız paketler farklı projelerde rahatlıkla kullanılabilir.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

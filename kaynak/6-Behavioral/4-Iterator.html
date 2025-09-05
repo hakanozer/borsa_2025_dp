@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot ve REST API ile Iterator Tasarım Deseni</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #005f99;
+            --secondary-color: #f0f0f0;
+            --text-color: #333;
+            --light-text-color: #666;
+            --bg-color: #fff;
+            --card-bg-color: #fafafa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            color: var(--light-text-color);
+            font-size: 1.1em;
+        }
+
+        .content h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-size: 1.8em;
+        }
+
+        .content h3 {
+            color: var(--text-color);
+            font-weight: 700;
+            margin-top: 30px;
+            font-size: 1.4em;
+        }
+
+        .content p {
+            margin-bottom: 20px;
+        }
+
+        .code-block {
+            background-color: var(--card-bg-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95em;
+        }
+
+        .benefit-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .benefit-list li {
+            background: var(--card-bg-color);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--primary-color);
+            position: relative;
+        }
+
+        .benefit-list li strong {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .content h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Spring Boot ve REST API ile Iterator Tasarım Deseni</h1>
+        <p>Gelişmiş Yazılımcılar için Koleksiyonlara Güvenli ve Bağımsız Erişim</p>
+    </header>
+
+    <div class="content">
+        <h2>Iterator Nedir?</h2>
+        <p><strong>Iterator</strong>, GoF (Gang of Four) tarafından tanımlanmış bir <strong>davranışsal (behavioral)</strong> tasarım desenidir. Bu desenin temel amacı, bir koleksiyonun (liste, dizi, ağaç gibi) elemanlarına, koleksiyonun iç yapısını ifşa etmeden sırayla erişmek için bir yol sağlamaktır. Iterator, bir nesne dizisindeki elemanları gezinmek (traverse) için standart bir arayüz tanımlar. Bu sayede, istemci kodun (client code) koleksiyonun nasıl depolandığı (örneğin, bir <code>ArrayList</code>, bir <code>HashMap</code> veya kendi özel veri yapınız) hakkında bilgi sahibi olması gerekmez.</p>
+
+        <p>Java dilinde, <code>java.util.Iterator</code> arayüzü bu desenin en yaygın örneğidir. <code>hasNext()</code>, <code>next()</code> ve <code>remove()</code> gibi metotları içerir. Iterator deseni, **ayrıştırma (decoupling)** ilkesini destekleyerek, koleksiyonun kendisini ve onun üzerinde işlem yapan kodu birbirinden bağımsız hale getirir.</p>
+
+        ---
+
+        <h2>Neden ve Ne Zaman Kullanılmalı? (Neden-Sonuç İlişkisi)</h2>
+        <p>Bir REST API geliştirirken, bir koleksiyonu (örneğin, ürün listesi, kullanıcı listesi) farklı şekillerde (filtrelenmiş, sıralanmış, sayfalanmış) istemciye sunmamız gerekebilir. Bu durumun neden-sonuç ilişkisini aşağıdaki senaryo üzerinden inceleyelim:</p>
+        
+        <p><strong>Senaryo:</strong> Bir sosyal medya API'sinde, kullanıcının arkadaşlarını veya takipçilerini listeleme işlevselliği bulunmaktadır. Ancak, bu listeyi bazen alfabetik sıraya göre, bazen en son eklenenlere göre ve bazen de sadece "premium" üyeleri içerecek şekilde döndürmemiz gerekebilir. Ayrıca, bu kullanıcı listesi bazen veritabanından, bazen bir önbellekten (cache) ve hatta bazen farklı bir mikroservis API'sinden gelebilir.</p>
+        
+        <p><strong>Yetersiz Yaklaşım (Sıkı Bağlı ve Kırılgan Kod):</strong> Eğer Iterator deseni kullanılmazsa, her bir gösterim şekli (sıralama, filtreleme) için API kontrolcüsünde veya servis katmanında sıkı bağlı, tekrarlayan kodlar yazmamız gerekebilir:</p>
+
+        <div class="code-block">
+            <pre>
+@GetMapping("/api/users/friends")
+public List&lt;User&gt; getFriends(@RequestParam(required = false) String sort) {
+    List&lt;User&gt; friends = friendshipService.getFriends();
+    
+    if ("alpha".equals(sort)) {
+        Collections.sort(friends, Comparator.comparing(User::getName));
+    } else if ("newest".equals(sort)) {
+        Collections.sort(friends, Comparator.comparing(User::getJoinedDate).reversed());
+    }
+    
+    return friends;
+}
+            </pre>
+        </div>
+
+        <p><strong>Sonuç:</strong> Bu yaklaşım, yeni bir sıralama veya filtreleme kriteri eklendiğinde (örneğin, en aktif kullanıcılara göre sıralama) mevcut kontrolcü metodunu değiştirmemizi gerektirir. Ayrıca, farklı veri yapıları (örneğin, sıralı bir <code>TreeSet</code> yerine sırasız bir <code>HashSet</code>) kullanıldığında kodun büyük olasılıkla kırılmasına neden olur. Bu, **Open-Closed Principle (Açık/Kapalı Prensibi)** ve **Single Responsibility Principle (Tek Sorumluluk Prensibi)**'nin ihlalidir. Veri yapısı ve gezinme (traversal) mantığı sıkıca birbirine bağlanmıştır.</p>
+
+        <p><strong>Iterator Çözümü:</strong> Bu sorunu çözmek için, koleksiyonun kendisinden bağımsız, ancak onun üzerinde gezinme yeteneğine sahip bir <code>Iterator</code> nesnesi oluşturabiliriz. Her bir gezinme mantığı (sıralama, filtreleme) için özel bir iterator implementasyonu yazabiliriz. Böylece, API kontrolcüsü sadece bu iterator'ları kullanır, temel veri yapısının detaylarıyla ilgilenmez.</p>
+        
+        <p><strong>Adımlar:</strong></p>
+        <ol>
+            <li>Tüm koleksiyonlar için ortak bir arayüz (<code>UserCollection</code>) ve tüm iterator'lar için bir arayüz (<code>UserIterator</code>) tanımlayın.</li>
+            <li>Somut koleksiyon sınıfları (<code>FriendList</code>), kendi iterator'larını üretecek bir metot (<code>createIterator()</code>) implemente eder.</li>
+            <li>Farklı gezinme ihtiyaçları için (örneğin, filtrelenmiş veya sıralanmış gezinme), <code>UserIterator</code> arayüzünü implemente eden somut iterator sınıfları (<code>SortedUserIterator</code>, <code>PremiumUserIterator</code>) oluşturun.</li>
+            <li>Kontrolcü, isteğe göre doğru iterator'ı oluşturur ve bu iterator'ı kullanarak veriyi tüketir.</li>
+        </ol>
+
+        <div class="code-block">
+            <pre>
+// 1. Iterator ve Collection Arayüzleri
+public interface UserIterator {
+    boolean hasNext();
+    User next();
+}
+
+public interface UserCollection {
+    UserIterator createIterator();
+}
+
+// 2. Concrete Iterators
+public class PremiumUserIterator implements UserIterator {
+    private final List&lt;User&gt; users;
+    private int position;
+
+    public PremiumUserIterator(List&lt;User&gt; users) {
+        this.users = users;
+        this.position = 0;
+    }
+
+    @Override
+    public boolean hasNext() {
+        while (position &lt; users.size() &amp;&amp; !users.get(position).isPremium()) {
+            position++;
+        }
+        return position &lt; users.size();
+    }
+
+    @Override
+    public User next() {
+        if (hasNext()) {
+            return users.get(position++);
+        }
+        return null;
+    }
+}
+
+// 3. Concrete Collection ve Controller Kullanımı
+@Service
+public class UserRepository {
+    public List&lt;User&gt; findAll() { /* DB'den kullanıcıları çeker */ }
+}
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @GetMapping("/premium")
+    public List&lt;User&gt; getPremiumUsers() {
+        List&lt;User&gt; allUsers = userRepository.findAll();
+        UserIterator iterator = new PremiumUserIterator(allUsers);
+        
+        List&lt;User&gt; premiumUsers = new ArrayList&lt;&gt;();
+        while(iterator.hasNext()) {
+            premiumUsers.add(iterator.next());
+        }
+        return premiumUsers;
+    }
+}
+            </pre>
+        </div>
+
+        ---
+
+        <h2>Kullanılmasının Sağlayacağı Faydalar</h2>
+        <ul class="benefit-list">
+            <li>
+                <strong>Bağımsızlık ve Gevşek Bağlılık:</strong> İstemci kodu (kontrolcü), gezinme mantığından (nasıl sıralandığı veya filtrelendiği) tamamen soyutlanır. Sadece <code>hasNext()</code> ve <code>next()</code> metotlarını kullanır. Bu, veri yapısı ve gezinme algoritmalarının birbirinden bağımsız geliştirilmesini ve değiştirilmesini sağlar.
+            </li>
+            <li>
+                <strong>Esneklik ve Genişletilebilirlik:</strong> Yeni bir gezinme yöntemi (örneğin, <code>ReverseOrderIterator</code>) eklemek istediğinizde, mevcut kontrolcü koduna dokunmanıza gerek kalmaz. Sadece yeni bir iterator sınıfı yazmanız yeterlidir. Bu, **Open-Closed Principle'a** mükemmel bir uyum sağlar.
+            </li>
+            <li>
+                <strong>Tek Sorumluluk Prensibi (Single Responsibility Principle):</strong> Her sınıfın tek bir sorumluluğu vardır: koleksiyon sınıfı veriyi tutar, iterator sınıfı ise o veri üzerinde gezinme mantığını içerir. Bu ayrım, kodun okunabilirliğini ve bakımını kolaylaştırır.
+            </li>
+            <li>
+                <strong>Çoklu Gezinme Yöntemleri:</strong> Aynı koleksiyon üzerinde aynı anda birden fazla gezinme işlemi gerçekleştirebilirsiniz. Her iterator nesnesinin kendi durumu (gezinme konumu) olduğu için, bu işlemler birbirine müdahale etmez.
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

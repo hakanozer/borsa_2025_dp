@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Patterns - İleri Seviye Yazılım Eğitimi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-6">
+      <h1 class="text-3xl font-bold">Design Patterns - Çeşitli Pattern Tanımları</h1>
+      <p class="text-lg mt-2 opacity-90">Spring Boot 3.5 ile REST API Geliştirme Perspektifinden</p>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-10">
+    <!-- Açıklama -->
+    <section class="mb-10">
+      <div class="bg-white shadow-lg rounded-2xl p-6">
+        <h2 class="text-2xl font-semibold mb-4">Genel Bakış</h2>
+        <p class="leading-relaxed text-gray-700">
+          Design Patterns, yazılım geliştiricilerin karşılaştığı tekrar eden problemler için kanıtlanmış
+          çözüm önerileri sunar. Özellikle kurumsal ölçekte <strong>REST API</strong> geliştirilirken,
+          sürdürülebilirlik, test edilebilirlik ve esneklik açısından kritik rol oynarlar. 
+          Aşağıda bazı temel pattern tanımları ve bunların Spring Boot dünyasındaki
+          <em>neden-sonuç ilişkileri</em> ile sağladığı faydalar açıklanmaktadır.
+        </p>
+      </div>
+    </section>
+
+    <!-- Factory Pattern -->
+    <section class="mb-10">
+      <div class="bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
+        <h3 class="text-xl font-bold text-indigo-700 mb-3">Factory Pattern</h3>
+        <p class="mb-4">
+          <strong>Neden?</strong> Uygulamalarda nesne oluşturma süreci karmaşıklaştığında, 
+          farklı tipte nesneler oluşturma mantığını merkezileştirmek gerekir. Bu sayede 
+          <code>new</code> anahtar kelimesine doğrudan bağımlılık azalır.
+        </p>
+        <p class="mb-4">
+          <strong>Sonuç:</strong> Nesne oluşturma süreci soyutlandığı için, yeni türler eklendiğinde
+          mevcut kod bozulmaz. Özellikle <strong>REST API response</strong> tiplerinin çeşitlendiği senaryolarda 
+          <em>Factory</em>, response üretimini standartlaştırır.
+        </p>
+        <ul class="list-disc ml-6 text-gray-700">
+          <li>Kod tekrarını azaltır.</li>
+          <li>Open/Closed Principle (SOLID) destekler.</li>
+          <li>Mocklama ve test süreçlerini kolaylaştırır.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Singleton Pattern -->
+    <section class="mb-10">
+      <div class="bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
+        <h3 class="text-xl font-bold text-indigo-700 mb-3">Singleton Pattern</h3>
+        <p class="mb-4">
+          <strong>Neden?</strong> Uygulama genelinde tek bir nesnenin paylaşılması gerektiğinde (örneğin, 
+          <code>CacheManager</code>, <code>Configuration Loader</code>), kontrolsüz instance oluşumu kaynak 
+          tüketimini artırabilir.
+        </p>
+        <p class="mb-4">
+          <strong>Sonuç:</strong> Tek instance ile memory optimizasyonu sağlanır. Spring context içinde 
+          Bean’lerin varsayılan olarak Singleton olması bu nedenle kritik önem taşır.
+        </p>
+        <ul class="list-disc ml-6 text-gray-700">
+          <li>Kaynak kullanımını optimize eder.</li>
+          <li>Uygulamanın farklı katmanlarında ortak yapıların tekrar kullanılmasını sağlar.</li>
+          <li>Spring IoC Container ile doğal entegrasyon gösterir.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Observer Pattern -->
+    <section class="mb-10">
+      <div class="bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
+        <h3 class="text-xl font-bold text-indigo-700 mb-3">Observer Pattern</h3>
+        <p class="mb-4">
+          <strong>Neden?</strong> Bir nesnede meydana gelen değişikliğin, başka nesneleri otomatik olarak 
+          bilgilendirmesi gerekiyorsa (ör. <strong>Event Driven Architecture</strong>), observer yaklaşımı şarttır.
+        </p>
+        <p class="mb-4">
+          <strong>Sonuç:</strong> REST API’de event publishing mekanizmaları (örn. Kafka, RabbitMQ entegrasyonu)
+          bu mantığa dayanır. Mikroservisler arası gevşek bağlı iletişim sağlanır.
+        </p>
+        <ul class="list-disc ml-6 text-gray-700">
+          <li>Reaktif programlama yaklaşımlarını destekler.</li>
+          <li>Microservice’ler arasında loosely-coupled mimari oluşturur.</li>
+          <li>Event-driven loglama ve monitoring sistemlerinde kritik rol oynar.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Strategy Pattern -->
+    <section class="mb-10">
+      <div class="bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
+        <h3 class="text-xl font-bold text-indigo-700 mb-3">Strategy Pattern</h3>
+        <p class="mb-4">
+          <strong>Neden?</strong> Bir algoritmanın farklı implementasyonları gerektiğinde, 
+          if-else bloklarına boğulmak yerine <em>Strategy</em> yaklaşımı tercih edilmelidir.
+        </p>
+        <p class="mb-4">
+          <strong>Sonuç:</strong> Örneğin, ödeme sistemlerinde farklı <code>PaymentProvider</code>’ların 
+          aynı arayüz üzerinden yönetilmesi mümkün hale gelir. Kod bakımı ve test süreçleri kolaylaşır.
+        </p>
+        <ul class="list-disc ml-6 text-gray-700">
+          <li>Dinamik algoritma seçimi yapılabilir.</li>
+          <li>Karmaşık if-else yapılarının önüne geçer.</li>
+          <li>Spring’in <code>@Qualifier</code> anotasyonu ile farklı bean implementasyonlarının seçilmesine olanak sağlar.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Decorator Pattern -->
+    <section class="mb-10">
+      <div class="bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
+        <h3 class="text-xl font-bold text-indigo-700 mb-3">Decorator Pattern</h3>
+        <p class="mb-4">
+          <strong>Neden?</strong> Nesnelere yeni davranışlar eklemek gerektiğinde kalıtım kullanmak her zaman 
+          esnek bir çözüm değildir. Runtime sırasında dinamik özellik eklemek gerektiğinde <em>Decorator</em> daha uygundur.
+        </p>
+        <p class="mb-4">
+          <strong>Sonuç:</strong> Örneğin, REST API response’una condition bazlı logging veya caching eklemek 
+          için decorator kullanımı esneklik sağlar. Spring AOP yapısı bu mantığı uygular.
+        </p>
+        <ul class="list-disc ml-6 text-gray-700">
+          <li>Kalıtım yerine kompozisyon avantajı sunar.</li>
+          <li>Davranış eklemeyi runtime’a taşır.</li>
+          <li>Spring AOP ve Proxy mekanizmaları ile doğal olarak desteklenir.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-gray-900 text-gray-300 py-6 mt-10">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <p class="text-sm">&copy; 2025 İleri Seviye Yazılım Eğitimi - Design Patterns</p>
+    </div>
+  </footer>
+</body>
+</html>

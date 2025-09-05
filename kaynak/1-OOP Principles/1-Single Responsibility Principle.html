@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single Responsibility Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #2563eb;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Single Responsibility Principle (SRP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Single Responsibility Principle</strong>, SOLID prensiplerinin ilkidir ve bir sınıfın sadece <em>tek bir sorumluluğu</em> olması gerektiğini söyler. Yani bir sınıf değişmesi için yalnızca <em>tek bir nedene</em> sahip olmalıdır.</p>
+      <p>Spring Boot uygulamalarında SRP’ye uymak, <strong>kodun okunabilirliğini, test edilebilirliğini ve bakımı</strong> kolaylaştırır. Eğer bir sınıf birden fazla iş yapıyorsa (örneğin hem veritabanı yönetimi hem de iş mantığı içeriyorsa), değişikliklerin etkisi büyür, hata oranı artar ve kod bağımlılıkları karmaşıklaşır.</p>
+      <p><strong>Sonuç olarak:</strong> SRP uygulanmazsa kod <em>monolitik</em> hale gelir, test yazmak zorlaşır ve refactoring sırasında zincirleme hatalar oluşur. Uygulanırsa ise kod <em>esnek, sürdürülebilir ve genişletilebilir</em> olur.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+      <p>Aşağıda <strong>yanlış</strong> ve <strong>doğru</strong> kullanım örnekleri verilmiştir:</p>
+
+      <h3>❌ Yanlış Kullanım (SRP ihlali)</h3>
+      <pre><code>package com.example.demo.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+
+    // Hem iş mantığı hem de veritabanı erişimi aynı sınıfta
+
+    public void createUser(String name) {
+        // İş mantığı
+        if(name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Geçersiz isim!");
+        }
+
+        // Veritabanı kaydı (SRP ihlali)
+        System.out.println("Kullanıcı kaydedildi: " + name);
+    }
+}
+</code></pre>
+
+      <h3>✅ Doğru Kullanım (SRP uygulanmış)</h3>
+      <pre><code>package com.example.demo.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public void createUser(String name) {
+        if(name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Geçersiz isim!");
+        }
+        userRepository.save(new User(name));
+    }
+}
+
+// Ayrı repository sınıfı
+package com.example.demo.repository;
+
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class UserRepository {
+    public void save(User user) {
+        System.out.println("Kullanıcı kaydedildi: " + user.getName());
+    }
+}
+</code></pre>
+
+      <p>Bu yapı sayesinde <strong>iş mantığı</strong> ve <strong>veri erişimi</strong> birbirinden ayrılmıştır. Eğer yarın veritabanı teknolojisini değiştirirsek (örneğin PostgreSQL → MongoDB), sadece <code>UserRepository</code> üzerinde değişiklik yapmamız yeterlidir. <code>UserService</code> etkilenmez.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Daha kolay test yazılabilirlik (Mock repository kullanılabilir).</li>
+        <li>Kod bakımı ve refactoring çok daha güvenli yapılır.</li>
+        <li>Değişiklikler sadece ilgili sınıfları etkiler.</li>
+        <li>Takım çalışmasında iş bölümü daha net olur.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Bağımsız Geliştirme:</strong> Farklı ekipler aynı projede bağımsız olarak çalışabilir.</li>
+        <li><strong>Kolay Genişletilebilirlik:</strong> Yeni özellik eklemek daha az risk taşır.</li>
+        <li><strong>Performans İzleme:</strong> Her katman ayrı ölçülebilir, performans sorunları daha kolay tespit edilir.</li>
+        <li><strong>Test Edilebilirlik:</strong> Unit test yazmak çok daha basit hale gelir, çünkü mock nesneler rahatlıkla kullanılabilir.</li>
+        <li><strong>Uzun Vadeli Sürdürülebilirlik:</strong> Proje büyüdükçe teknik borç birikimi engellenir.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>

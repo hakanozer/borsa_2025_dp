@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reuse/Release Equivalency Principle - Spring Boot 3.5</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0f172a;
+      color: #f9fafb;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #10b981;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f3f4f6;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+      pre {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reuse/Release Equivalency Principle (REP) - Spring Boot 3.5</h1>
+  </header>
+  <main>
+    <section>
+      <h2>📌 Teorik Açıklama</h2>
+      <p><strong>Reuse/Release Equivalency Principle (REP)</strong>, bir yazılım bileşeninin tekrar kullanılabilir olması için aynı zamanda <strong>resmi bir sürüm yönetimine</strong> tabi tutulması gerektiğini belirtir.</p>
+      <p>Başka bir deyişle: <em>"Bir bileşen yeniden kullanılabilir hale gelmeden, serbest bırakılabilir (release) bir sürüme sahip olmalıdır."</em></p>
+      <p>Bu ilke, özellikle <strong>kütüphane, modül ve paket geliştirme</strong> süreçlerinde önemlidir. Spring Boot projelerinde sık sık tekrar kullanılabilir modüller (örneğin <code>starter</code> bağımlılıkları) oluşturulur ve bunların her biri <strong>versiyonlanır</strong>.</p>
+      <p><strong>Sonuç olarak:</strong> Eğer tekrar kullanılabilir kodlar sürüm yönetimine dahil edilmezse, farklı projelerde kullanılmaları zorlaşır, uyumsuzluklar artar ve bakım maliyeti yükselir. Sürüm yönetimi yapıldığında ise kod güvenilir ve sürdürülebilir olur.</p>
+    </section>
+
+    <section>
+      <h2>🚀 Spring Boot 3.5 Örneği</h2>
+
+      <h3>✅ Doğru Kullanım (REP uygulanmış)</h3>
+      <pre><code>// common-logging kütüphanesi (ayrı bir module)
+package com.example.common;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LogHelper {
+    private static final Logger logger = LoggerFactory.getLogger(LogHelper.class);
+
+    public static void info(String message) {
+        logger.info(message);
+    }
+}
+</code></pre>
+
+      <pre><code>// user-service module (common-logging'e bağımlı)
+package com.example.userservice;
+
+import com.example.common.LogHelper;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+    public void createUser(String name) {
+        // iş mantığı
+        LogHelper.info("Yeni kullanıcı oluşturuldu: " + name);
+    }
+}
+</code></pre>
+
+      <p>Burada <code>common-logging</code> ayrı bir bağımsız modül olarak geliştirilmiş ve <strong>versiyon numarası</strong> verilerek başka servislere eklenmiştir (<code>user-service</code> gibi). Bu sayede aynı logging kütüphanesi farklı projelerde de kullanılabilir hale gelir.</p>
+    </section>
+
+    <section>
+      <h2>🎯 Kazanımlar</h2>
+      <ul>
+        <li>Tekrar kullanılabilir bileşenler güvenilir bir sürüm yönetimi ile desteklenir.</li>
+        <li>Projeler arası uyumluluk artar.</li>
+        <li>Kütüphaneler bağımsız geliştirilip paylaşılabilir.</li>
+        <li>Bakım kolaylaşır, güncellemeler kontrollü yapılır.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💡 Kullanılması Durumunda Sağlayacağı Avantajlar</h2>
+      <ul>
+        <li><strong>Stabilite:</strong> Farklı projelerde aynı versiyon kütüphane kullanılarak uyumsuzluk engellenir.</li>
+        <li><strong>Paylaşılabilirlik:</strong> Modüller başka ekipler veya projelerle güvenle paylaşılır.</li>
+        <li><strong>Tekrar Kullanım:</strong> Aynı modül farklı projelerde yeniden yazılmadan kullanılabilir.</li>
+        <li><strong>Versiyon Kontrolü:</strong> Hangi sürümün nerede kullanıldığı net şekilde takip edilir.</li>
+        <li><strong>Bakım Kolaylığı:</strong> Yeni sürüme geçiş süreçleri kolaylaşır.</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    Daha fazla ileri seviye içerik için 👉 <a href="https://gptonline.ai/tr/" target="_blank">GPT Online</a>
+  </footer>
+</body>
+</html>
